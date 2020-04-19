@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ import net.AbstractMaplePacketHandler;
 import server.CashShop;
 import tools.data.input.SeekableLittleEndianAccessor;
 import tools.MaplePacketCreator;
+import tools.Pair;
 
 /**
  *
@@ -36,12 +37,13 @@ public class CashShopSurpriseHandler extends AbstractMaplePacketHandler {
         CashShop cs = c.getPlayer().getCashShop();
         
         if(cs.isOpened()) {
-            Item cssItem = cs.openCashShopSurprise();
+            Pair<Item, Item> cssResult = cs.openCashShopSurprise();
             
-            if(cssItem != null) {
-                c.announce(MaplePacketCreator.showCashShopMessage((byte) 0xA4));
+            if(cssResult != null) {
+                Item cssItem = cssResult.getLeft(), cssBox = cssResult.getRight();
+                c.announce(MaplePacketCreator.onCashGachaponOpenSuccess(c.getAccID(), cssBox.getSN(), cssBox.getQuantity(), cssItem, cssItem.getItemId(), cssItem.getQuantity(), true));
             } else {
-                c.announce(MaplePacketCreator.showCashShopMessage((byte) 0x00));
+                c.announce(MaplePacketCreator.onCashItemGachaponOpenFailed());
             }
         }
     }

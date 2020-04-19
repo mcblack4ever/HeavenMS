@@ -31,13 +31,25 @@ import tools.data.input.SeekableLittleEndianAccessor;
 /**
  *
  * @author kevintjuh93
+ * 
+ * Modified by -- Ronan - concurrency protection
  */
 public class UseGachaExpHandler extends AbstractMaplePacketHandler {
+    
+    @Override
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-        if (c.getPlayer().getGachaExp() == 0) {
-            AutobanFactory.GACHA_EXP.autoban(c.getPlayer(), "Player tried to redeem GachaEXP, but had none to redeem.");
+        
+        if (c.tryacquireClient()) {
+            try {
+                if (c.getPlayer().getGachaExp() <= 0) {
+                    AutobanFactory.GACHA_EXP.autoban(c.getPlayer(), "Player tried to redeem GachaEXP, but had none to redeem.");
+                }
+                c.getPlayer().gainGachaExp();
+            } finally {
+                c.releaseClient();
+            }
         }
-        c.getPlayer().gainGachaExp();
+        
         c.announce(MaplePacketCreator.enableActions());
     }
 }

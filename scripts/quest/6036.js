@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -48,14 +48,13 @@ function end(mode, type, selection) {
                 qm.dispose();
                 return;
             }
-        } else {
+        } else if (status == 2) {
+            qm.forceCompleteQuest();
+            
             qm.gainItem(4031980, -1);
-                
             var skillid = Math.floor(qm.getPlayer().getJob().getId() / 1000) * 10000000 + 1007;
             qm.teachSkill(skillid, 3, 3, -1);
-
             qm.gainExp(300000);
-            qm.forceCompleteQuest();
             
             qm.dispose();
         }

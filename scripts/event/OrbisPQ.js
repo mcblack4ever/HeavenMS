@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -180,7 +180,7 @@ function playerEntry(eim, player) {
         player.changeMap(map, map.getPortal(0));
         
         var texttt = "Hi, my name is Eak, the Chamberlain of the Goddess. Don't be alarmed; you won't be able to see me right now. Back when the Goddess turned into a block of stone, I simultaneously lost my own power. If you gather up the power of the Magic Cloud of Orbis, however, then I'll be able to recover my body and re-transform back to my original self. Please collect #b20#k Magic Clouds and bring them back to me. Right now, you'll only see me as a tiny, flickering light.";
-        player.getClient().getAbstractPlayerInteraction().npcTalk(2013001, texttt);
+        player.getAbstractPlayerInteraction().npcTalk(2013001, texttt);
 }
 
 function scheduledTimeout(eim) {

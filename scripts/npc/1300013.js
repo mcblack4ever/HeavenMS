@@ -44,16 +44,25 @@ function action(mode, type, selection){
                         }
                     
                         else if(selection == 1){
-                                var pm = cm.getEventManager("MK_PrimeMinister2");
-                                pm.setProperty("player", cm.getPlayer().getName());
-                                pm.startInstance(cm.getPlayer());
+                                var em = cm.getEventManager("MK_PrimeMinister2");
+                                
+                                var party = cm.getPlayer().getParty();
+                                if (party != null) {
+                                    if (!em.startInstance(party, cm.getMap(), 1)) {
+                                        cm.sendOk("Another party is already challenging the boss in this channel.");
+                                    }
+                                } else {
+                                    if (!em.startInstance(cm.getPlayer())) {
+                                        cm.sendOk("Another party is already challenging the boss in this channel.");
+                                    }
+                                }
                                 
                                 cm.dispose();
                                 return;
                         }
                 }
         } else {
-                var questProgress = cm.getQuestProgress(2330, 3300005) + cm.getQuestProgress(2330, 3300006) + cm.getQuestProgress(2330, 3300007); //3 Yetis
+                var questProgress = cm.getQuestProgressInt(2330, 3300005) + cm.getQuestProgressInt(2330, 3300006) + cm.getQuestProgressInt(2330, 3300007); //3 Yetis
                 if (!(cm.isQuestStarted(2330) && questProgress < 3)) {  // thanks Vcoc for finding an exploit with boss entry through NPC
                         cm.dispose();
                         return;

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -52,7 +52,7 @@ public class WarpWorldCommand extends Command {
                 String[] socket = server.getInetSocket(worldb, c.getChannel());
                 c.getWorldServer().removePlayer(player);
                 player.getMap().removePlayer(player);//LOL FORGOT THIS ><
-                c.updateLoginState(MapleClient.LOGIN_SERVER_TRANSITION);
+                player.setSessionTransitionState();
                 player.setWorld(worldb);
                 player.saveCharToDB();//To set the new world :O (true because else 2 player instances are created, one in both worlds)
                 c.announce(MaplePacketCreator.getChannelChange(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1])));

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -61,10 +61,9 @@ function end(mode, type, selection) {
             qm.sendNext("Oh, hi #h0#! You won't believe what I just uncovered. It's one of your lost skills... What, the seal of Orbis got stolen by the Black Wings? Oh my...");
         } else if(status == 1) {
             qm.sendNext("For now, let me teach you the #bCombo Smash#k, with it you will be able to deal massive amount of damage to many monsters at once. We will need to use it if we want to stand a chance against the Black Wings now, so don't forget it!");
-        } else {
-            qm.teachSkill(21100004, 0, 20, -1); // combo smash
-            
+        } else if(status == 2) {
             qm.forceCompleteQuest();
+            qm.teachSkill(21100004, 0, 20, -1); // combo smash
             qm.dispose();
         }
     }

@@ -29,11 +29,12 @@ import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import client.inventory.manipulator.MapleKarmaManipulator;
-import client.processor.FredrickProcessor;
+import client.processor.npc.FredrickProcessor;
 import com.mysql.jdbc.Statement;
-import constants.ServerConstants;
+import config.YamlConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,7 @@ import tools.DatabaseConnection;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import net.server.audit.locks.MonitoredLockType;
+import server.MapleTrade;
 
 /**
  *
@@ -230,13 +232,13 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                 chr.announce(MaplePacketCreator.updateHiredMerchant(this, chr));
             }
             
-            if (ServerConstants.USE_ENFORCE_MERCHANT_SAVE) {
+            if (YamlConfig.config.server.USE_ENFORCE_MERCHANT_SAVE) {
                 chr.saveCharToDB(false);
             }
         }
     }
     
-    private static boolean canBuy(MapleClient c, Item newItem) {
+    private static boolean canBuy(MapleClient c, Item newItem) {    // thanks xiaokelvin (Conrad) for noticing a leaked test code here
         return MapleInventoryManipulator.checkSpace(c, newItem.getItemId(), newItem.getQuantity(), newItem.getOwner()) && MapleInventoryManipulator.addFromDrop(c, newItem, false);
     }
     
@@ -274,6 +276,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
             if (c.getPlayer().getMeso() >= price) {
                 if (canBuy(c, newItem)) {
                     c.getPlayer().gainMeso(-price, false);
+                    price -= MapleTrade.getFee(price);  // thanks BHB for pointing out trade fees not applying here
                     
                     synchronized (sold) {
                         sold.add(new SoldItem(c.getPlayer().getName(), pItem.getItem().getItemId(), newItem.getQuantity(), price));
@@ -284,7 +287,7 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                         pItem.setDoesExist(false);
                     }
                     
-                    if(ServerConstants.USE_ANNOUNCE_SHOPITEMSOLD) {   // idea thanks to Vcoc
+                    if(YamlConfig.config.server.USE_ANNOUNCE_SHOPITEMSOLD) {   // idea thanks to Vcoc
                         announceItemSold(newItem, price, getQuantityLeft(pItem.getItem().getItemId()));
                     }
                     
@@ -295,8 +298,20 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                         try {
                             Connection con = DatabaseConnection.getConnection();
                             
-                            try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = MerchantMesos + " + price + " WHERE id = ?", Statement.RETURN_GENERATED_KEYS)) {
+                            long merchantMesos = 0;
+                            try (PreparedStatement ps = con.prepareStatement("SELECT MerchantMesos FROM characters WHERE id = ?")) {
                                 ps.setInt(1, ownerId);
+                                try (ResultSet rs = ps.executeQuery()) {
+                                    if (rs.next()) {
+                                        merchantMesos = rs.getInt(1);
+                                    }
+                                }
+                            }
+                            merchantMesos += price;
+                            
+                            try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = ? WHERE id = ?", Statement.RETURN_GENERATED_KEYS)) {
+                                ps.setInt(1, (int) Math.min(merchantMesos, Integer.MAX_VALUE));
+                                ps.setInt(2, ownerId);
                                 ps.executeUpdate();
                             }
                             
@@ -398,18 +413,6 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
         this.removeOwner(c.getPlayer());
 
         try {
-            MapleCharacter player = c.getWorldServer().getPlayerStorage().getCharacterById(ownerId);
-            if(player != null) {
-                    player.setHasMerchant(false);
-            } else {
-                    Connection con = DatabaseConnection.getConnection();
-                    try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET HasMerchant = 0 WHERE id = ?", Statement.RETURN_GENERATED_KEYS)) {
-                            ps.setInt(1, ownerId);
-                            ps.executeUpdate();
-                    }
-                    con.close();
-            }
-
             List<MaplePlayerShopItem> copyItems = getItems();
             if (check(c.getPlayer(), copyItems) && !timeout) {
                 for (MaplePlayerShopItem mpsi : copyItems) {
@@ -433,7 +436,20 @@ public class MapleHiredMerchant extends AbstractMapleMapObject {
                 e.printStackTrace();
             }
             
-            if (ServerConstants.USE_ENFORCE_MERCHANT_SAVE) {
+            // thanks Rohenn for noticing a possible dupe scenario on closing shop
+            MapleCharacter player = c.getWorldServer().getPlayerStorage().getCharacterById(ownerId);
+            if(player != null) {
+                    player.setHasMerchant(false);
+            } else {
+                    Connection con = DatabaseConnection.getConnection();
+                    try (PreparedStatement ps = con.prepareStatement("UPDATE characters SET HasMerchant = 0 WHERE id = ?", Statement.RETURN_GENERATED_KEYS)) {
+                            ps.setInt(1, ownerId);
+                            ps.executeUpdate();
+                    }
+                    con.close();
+            }
+            
+            if (YamlConfig.config.server.USE_ENFORCE_MERCHANT_SAVE) {
                 c.getPlayer().saveCharToDB(false);
             }
 

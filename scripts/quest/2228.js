@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -36,10 +36,9 @@ function start(mode, type, selection) {
         
         if (status == 0) {
             qm.sendNext("Thank you for defeating #rFaust#k. That will finally settle my spirit to rest.");
-        } else {
-            qm.gainFame(8);
-            
+        } else if (status == 1) {
             qm.forceCompleteQuest();
+            qm.gainFame(8);
             qm.dispose();
         }
     }

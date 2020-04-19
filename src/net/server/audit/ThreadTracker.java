@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -239,7 +239,10 @@ public class ThreadTracker {
                 }
                 else {
                     AtomicInteger c = lockCount.get(lockOid);
-                    c.decrementAndGet();
+                    if (c != null) {    // thanks BHB for detecting an NPE here
+                        c.decrementAndGet();
+                    }
+                    
                     lockUpdate.put(lockOid, 0);
 
                     List<MonitoredLockType> list = threadTracker.get(tid);

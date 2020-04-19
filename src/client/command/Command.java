@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ import client.MapleClient;
 
 public abstract class Command {
 
+    protected int rank;
     protected String description;
 
     public abstract void execute(MapleClient client, String[] params);
@@ -37,6 +38,14 @@ public abstract class Command {
 
     protected void setDescription(String description) {
         this.description = description;
+    }
+    
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
     }
 
     protected String joinStringFrom(String arr[], int start) {

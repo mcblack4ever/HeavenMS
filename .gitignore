@@ -55,6 +55,10 @@
 /tools/MapleEventMethodFiller/dist/
 /tools/MapleEventMethodFiller/nbproject/
 
+/tools/MapleGachaponItemidRetriever/build/
+/tools/MapleGachaponItemidRetriever/dist/
+/tools/MapleGachaponItemidRetriever/nbproject/
+
 /tools/MapleIdRetriever/build/
 /tools/MapleIdRetriever/dist/
 /tools/MapleIdRetriever/nbproject/
@@ -67,9 +71,17 @@
 /tools/MapleInvalidItemWithNoNameFetcher/dist/
 /tools/MapleInvalidItemWithNoNameFetcher/nbproject/
 
+/tools/MapleMapFieldLimitChecker/build/
+/tools/MapleMapFieldLimitChecker/dist/
+/tools/MapleMapFieldLimitChecker/nbproject/
+
 /tools/MapleMapInfoRetriever/build/
 /tools/MapleMapInfoRetriever/dist/
 /tools/MapleMapInfoRetriever/nbproject/
+
+/tools/MapleMapLootLimitChecker/build/
+/tools/MapleMapLootLimitChecker/dist/
+/tools/MapleMapLootLimitChecker/nbproject/
 
 /tools/MapleMesoFetcher/build/
 /tools/MapleMesoFetcher/dist/
@@ -102,6 +114,14 @@
 /tools/MapleReactorDropFetcher/build/
 /tools/MapleReactorDropFetcher/dist/
 /tools/MapleReactorDropFetcher/nbproject/
+
+/tools/MapleSkillbookChanceFetcher/build/
+/tools/MapleSkillbookChanceFetcher/dist/
+/tools/MapleSkillbookChanceFetcher/nbproject/
+
+/tools/MapleSkillbookStackUpdate/build/
+/tools/MapleSkillbookStackUpdate/dist/
+/tools/MapleSkillbookStackUpdate/nbproject/
 
 /tools/MapleSkillMakerFetcher/build/
 /tools/MapleSkillMakerFetcher/dist/

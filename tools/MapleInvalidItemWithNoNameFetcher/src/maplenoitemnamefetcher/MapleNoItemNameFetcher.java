@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -445,7 +445,7 @@ public class MapleNoItemNameFetcher {
     
     private static String getMissingEquipDesc(int itemid) {
         String s = descContentCache.get(itemid);
-        if (s == null) {
+        if (s == null && itemid >= 2000000) {   // thanks Halcyon for noticing "missing info" on equips
             s = "MISSING INFO " + itemid;
         }
         

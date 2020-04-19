@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ package net.server.audit.locks;
 
 public enum MonitoredLockType {
     UNDEFINED,
+    INTERVAL,
     CHARACTER_CHR,
     CHARACTER_CPN,
     CHARACTER_EFF,
@@ -34,7 +35,9 @@ public enum MonitoredLockType {
     CHARACTER_EVT,
     CHARACTER_STA,
     CLIENT,
+    CLIENT_ANNOUNCER,
     CLIENT_ENCODER,
+    CLIENT_SESSION,
     CLIENT_LOGIN,
     BOOK,
     ITEM,
@@ -64,6 +67,9 @@ public enum MonitoredLockType {
     GUILD,
     PARTY,
     WORLD_PARTY,
+    WORLD_PARTY_SEARCH_ECHELON,
+    WORLD_PARTY_SEARCH_QUEUE,
+    WORLD_PARTY_SEARCH_STORAGE,
     WORLD_SRVMESSAGES,
     WORLD_PETS,
     WORLD_CHARS,
@@ -72,6 +78,7 @@ public enum MonitoredLockType {
     WORLD_PSHOPS,
     WORLD_MERCHS,
     WORLD_MAPOBJS,
+    WORLD_SAVECHARS,
     WORLD_SUGGEST,
     EIM,
     EIM_PARTY,
@@ -93,7 +100,7 @@ public enum MonitoredLockType {
     VISITOR_MERCH,
     MAP_CHRS,
     MAP_OBJS,
-    MAP_FACTORY,
+    MAP_MANAGER,
     MAP_ITEM,
     MAP_LOOT,
     MAP_BOUNDS,

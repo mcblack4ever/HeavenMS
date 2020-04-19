@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,7 @@ package client.command.commands.gm0;
 
 import client.command.Command;
 import client.MapleClient;
-import net.server.coordinator.MapleLoginBypassCoordinator;
+import net.server.coordinator.login.MapleLoginBypassCoordinator;
 
 public class EnableAuthCommand extends Command {
     {

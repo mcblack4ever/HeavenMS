@@ -22,7 +22,7 @@
 /* Mino the Owner
 	Orbis VIP Hair/Hair Color Change.
 
-        GMS-like revised by Ronan. Contents found thanks to Mitsune (GamerBewbs), Waltzing, AyumiLove
+        GMS-like revised by Ronan -- contents found thanks to Mitsune (GamerBewbs), Waltzing, AyumiLove
 */
 var status = 0;
 var beauty = 0;
@@ -83,7 +83,10 @@ function action(mode, type, selection) {
         else if (status == 2){
             cm.dispose();
             if (beauty == 1){
-                if (cm.haveItem(5150005) == true){
+                if (cm.haveItem(5420004)){
+                    cm.setHair(hairnew[selection]);
+                    cm.sendOk("Enjoy your new and improved hairstyle!");
+                } else if (cm.haveItem(5150005) == true){
                     cm.gainItem(5150005, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");

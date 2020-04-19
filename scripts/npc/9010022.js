@@ -20,27 +20,28 @@ function action(mode, type, selection) {
         else 
             status--; 
             if (status == 0) { 
-            if (cm.getLevel() < 25) { 
+            if (cm.getLevel() < 20) { 
                 cm.sendDimensionalMirror("#-1# There is no place for you to transport to from here."); 
                 cm.dispose(); 
             } else { 
                 var selStr = ""; 
-                /*if (cm.getLevel() >= 20 && cm.getLevel() <= 30) { NOT IMPLEMENTED
+                if (cm.getLevel() >= 20 && cm.getLevel() <= 30) {
                     selStr += "#0# Ariant Coliseum"; 
-                } */
+                }
 
                 if (cm.getLevel() >= 25) { 
                     selStr += "#1# Mu Lung Dojo"; 
                 } 
 
-                /*if (cm.getLevel() >= 30 && cm.getLevel() <= 50) { NOT IMPLEMENTED
+                if (cm.getLevel() >= 30 && cm.getLevel() <= 50) {   // MC 1 & 2 recalled thanks to ---
                     selStr += "#2# Monster Carnival 1"; 
                 } 
 
-                if (cm.getLevel() >= 51 && cm.getLevel() <= 70) { NOT IMPLEMENTED
+                if (cm.getLevel() >= 51 && cm.getLevel() <= 70) {
                     selStr += "#3# Monster Carnival 2"; 
                 } 
 
+                /*
                 if (cm.getLevel() >= 40) { NOT IMPLEMENTED
                     selStr += "#5# Nett's Pyramid"; 
                 } 
@@ -62,16 +63,18 @@ function action(mode, type, selection) {
                     cm.warp(925020000, 0); 
                     break; 
                 case 2: 
+                    cm.getPlayer().saveLocation("MONSTER_CARNIVAL"); 
                     cm.warp(980000000, 3); 
                     break; 
                 case 3: 
+                    cm.getPlayer().saveLocation("MONSTER_CARNIVAL"); 
                     cm.warp(980030000, 3); 
                     break; 
                 case 5: 
-                    cm.warp(926010000); 
+                    cm.warp(926010000, 4); 
                     break; 
                 case 6: 
-                    cm.warp(910320000); 
+                    cm.warp(910320000, 2);
                     break; 
             } 
             cm.dispose(); 

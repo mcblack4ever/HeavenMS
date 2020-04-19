@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,7 @@
 function enter(pi) {
     if(pi.isQuestStarted(3935) && !pi.haveItem(4031574, 1)) {
         if(pi.getWarpMap(926000010).countPlayers() == 0) {
-            pi.playPortalSound(); pi.warp(926000010);
+            pi.playPortalSound(); pi.warp(926000010, 0);
             return true;
         } else {
             pi.message("Someone is already trying this map.");

@@ -42,7 +42,6 @@ public class EnterCashShopHandler extends AbstractMaplePacketHandler {
             if (mc.cannotEnterCashShop()) {
                 c.announce(MaplePacketCreator.enableActions());
                 return;
-                
             }
             
             if(mc.getEventInstance() != null) {
@@ -62,6 +61,7 @@ public class EnterCashShopHandler extends AbstractMaplePacketHandler {
             }
 
             mc.closePlayerInteractions();
+            mc.closePartySearchInteractions();
 
             mc.unregisterChairBuff();
             Server.getInstance().getPlayerBuffStorage().addBuffsToStorage(mc.getId(), mc.getAllBuffs());

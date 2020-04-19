@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -41,7 +41,10 @@ public class MapleCashidGenerator {
         ResultSet rs = ps.executeQuery();
         
         while (rs.next()) {
-            existentCashids.add(rs.getInt(1));
+            int id = rs.getInt(1);
+            if (!rs.wasNull()) {
+                existentCashids.add(id);
+            }
         }
         
         rs.close();

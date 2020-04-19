@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * 
  * This application acts two-way: first section sets up a table on the SQL Server with all the names used within MapleStory,
  * and the second queries all the names placed inside "fetch.txt", returning in the same line order the ids of the elements.
- * In case of multiple entries with the same name, multiple ids will be returned in the same line separated by a simple space
+ * In case of multiple entries with the same name, multiple ids will be returned in the same line split by a simple space
  * in ascending order. An empty line means that no entry with the given name in a line has been found.
  * 
  * IMPORTANT: this will fail for fetching MAP ID (you shouldn't be using this program for these, just checking them up in the
@@ -82,10 +82,10 @@ public class MapleIdRetriever {
     }
     
     private static void parseMapleHandbookLine(String line) throws SQLException {
-        String[] tokens = line.split(" - ");
+        String[] tokens = line.split(" - ", 3);
         
         if(tokens.length > 1) {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO `handbook` (`id`, `name`) VALUES (?, ?)");
+            PreparedStatement ps = con.prepareStatement("INSERT INTO `handbook` (`id`, `name`, `description`) VALUES (?, ?, ?)");
             try {
                 ps.setInt(1, Integer.parseInt(tokens[0]));
             } catch (NumberFormatException npe) {   // odd...
@@ -93,7 +93,10 @@ public class MapleIdRetriever {
                 ps.setInt(1, Integer.parseInt(num));
             }
             ps.setString(2, tokens[1]);
+            ps.setString(3, tokens.length > 2 ? tokens[2] : "");
             ps.execute();
+            
+            ps.close();
         }
     }
     
@@ -124,14 +127,17 @@ public class MapleIdRetriever {
     private static void setupSqlTable() throws SQLException {
         PreparedStatement ps = con.prepareStatement("DROP TABLE IF EXISTS `handbook`;");
         ps.execute();
+        ps.close();
         
         ps = con.prepareStatement("CREATE TABLE `handbook` ("
                 + "`key` int(10) unsigned NOT NULL AUTO_INCREMENT,"
                 + "`id` int(10) DEFAULT NULL,"
                 + "`name` varchar(200) DEFAULT NULL,"
+                + "`description` varchar(1000) DEFAULT '',"
                 + "PRIMARY KEY (`key`)"
                 + ") ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;");
         ps.execute();
+        ps.close();
     }
     
     private static void parseMapleHandbook() throws SQLException {
@@ -174,6 +180,9 @@ public class MapleIdRetriever {
                     str += id.toString();
                     str += " ";
                 }
+                
+                rs.close();
+                ps.close();
                 
                 printWriter.println(str);
             }

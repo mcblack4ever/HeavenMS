@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,7 @@ public class BossHpCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        for(MapleMonster monster : player.getMap().getMonsters()) {
+        for(MapleMonster monster : player.getMap().getAllMonsters()) {
             if(monster != null && monster.isBoss() && monster.getHp() > 0) {
                 long percent = monster.getHp() * 100L / monster.getMaxHp();
                 String bar = "[";

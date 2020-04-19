@@ -21,9 +21,13 @@
 
 importPackage(Packages.tools);
 
-var exitMap;
 var entryMap;
+var exitMap;
 var otherMap;
+
+var minMapId = 103040410;
+var maxMapId = 103040460;
+
 var minPlayers = 1;
 var fightTime = 30;
 var timer = 1000 * 60 * fightTime;
@@ -59,7 +63,7 @@ function respawn(eim) {
 
 function playerEntry(eim, player) {
 	var amplifierMap = eim.getMapInstance(entryMap.getId());
-	player.changeMap(amplifierMap);
+	player.changeMap(amplifierMap, 1);
         eim.schedule("timeOut", timer);
 }
 
@@ -80,7 +84,7 @@ function playerDisconnected(eim, player) {
 }
 
 function changedMap(eim, player, mapid) {
-    if(mapid == exitMap.getId()) {
+    if (mapid < minMapId || mapid > maxMapId) {
         if (eim.isEventTeamLackingNow(true, minPlayers, player)) {
             eim.unregisterPlayer(player);
             end(eim);

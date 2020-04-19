@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,6 @@ function start(mode, type, selection) {
             em = qm.getEventManager("BalrogQuest");
             if (em == null) {
                 qm.sendOk("Sorry, but the BalrogQuest is closed.");
-                qm.dispose();
                 return;
             }
             
@@ -47,8 +46,9 @@ function start(mode, type, selection) {
                 qm.sendOk("There is currently someone in this map, come back later.");
             } else {
                 qm.forceStartQuest();
+                qm.dispose();
             }
-
+        } else if (status == 1) {
             qm.dispose();
         }
     }

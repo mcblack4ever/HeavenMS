@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,7 @@ var maxMapId = 108010501;
 
 var eventTime = 20; //20 minutes
 
-var lobbyRange = [0, 0];
+var lobbyRange = [0, 7];
 
 function setLobbyRange() {
         return lobbyRange;

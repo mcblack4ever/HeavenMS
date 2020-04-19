@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -43,11 +43,15 @@ function action(mode, type, selection) {
     
                 if(status == 0) {
                         if(cm.isQuestStarted(3929)) {
-                            if(cm.getQuestProgress(3929, 2) != 1) {
-                                if(cm.haveItem(4031580)) {
-                                    cm.gainItem(4031580, -1);
-                                    cm.setQuestProgress(3929, 2, 1);
-                                }
+                            var progress = cm.getQuestProgress(3929);
+                            var slot = 2;
+                            
+                            var ch = progress[slot];
+                            if(ch == '2') {
+                                var nextProgress = progress.substr(0, slot) + '3' + progress.substr(slot + 1);
+
+                                cm.gainItem(4031580, -1);
+                                cm.setQuestProgress(3929, nextProgress);
                             }
                         }
                     

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ import client.MapleStat;
 import client.command.Command;
 import client.MapleClient;
 import client.MapleCharacter;
-import constants.ServerConstants;
+import config.YamlConfig;
 
 public class MaxStatCommand extends Command {
     {
@@ -40,7 +40,7 @@ public class MaxStatCommand extends Command {
         player.loseExp(player.getExp(), false, false);
         player.setLevel(255);
         player.resetPlayerRates();
-        if (ServerConstants.USE_ADD_RATES_BY_LEVEL) player.setPlayerRates();
+        if (YamlConfig.config.server.USE_ADD_RATES_BY_LEVEL) player.setPlayerRates();
         player.setWorldRates();
         player.updateStrDexIntLuk(Short.MAX_VALUE);
         player.setFame(13337);

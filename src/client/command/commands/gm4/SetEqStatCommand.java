@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -29,7 +29,7 @@ import client.MapleCharacter;
 import client.inventory.Equip;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
-import constants.ItemConstants;
+import constants.inventory.ItemConstants;
 
 public class SetEqStatCommand extends Command {
     {
@@ -68,7 +68,7 @@ public class SetEqStatCommand extends Command {
                 eq.setStr(newStat);
                 eq.setLuk(newStat);
 
-                byte flag = eq.getFlag();
+                short flag = eq.getFlag();
                 flag |= ItemConstants.UNTRADEABLE;
                 eq.setFlag(flag);
 

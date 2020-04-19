@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -27,22 +27,20 @@ import client.command.Command;
 import client.MapleClient;
 import client.MapleCharacter;
 import net.server.Server;
-import server.MaplePortal;
+import server.maps.MaplePortal;
 import server.TimerManager;
 import server.life.MapleMonster;
 import server.life.SpawnPoint;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
 import server.maps.MapleReactor;
-import tools.MaplePacketCreator;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
-import tools.packets.Wedding;
 
 public class DebugCommand extends Command {
-    private final static String debugTypes[] = {"monster", "packet", "portal", "spawnpoint", "pos", "map", "mobsp", "event", "areas", "reactors", "servercoupons", "playercoupons", "timer", "marriage", ""};
+    private final static String debugTypes[] = {"monster", "packet", "portal", "spawnpoint", "pos", "map", "mobsp", "event", "areas", "reactors", "servercoupons", "playercoupons", "timer", "marriage", "buff", ""};
     
     {
         setDescription("");
@@ -84,7 +82,7 @@ public class DebugCommand extends Command {
             case "portal":
                 MaplePortal portal = player.getMap().findClosestPortal(player.getPosition());
                 if (portal != null)
-                    player.dropMessage(6, "Closest portal: " + portal.getId() + " '" + portal.getName() + "' Type: " + portal.getType() + " --> toMap: " + portal.getTargetMapId() + " scriptname: '" + portal.getScriptName() + "' state: " + portal.getPortalState() + ".");
+                    player.dropMessage(6, "Closest portal: " + portal.getId() + " '" + portal.getName() + "' Type: " + portal.getType() + " --> toMap: " + portal.getTargetMapId() + " scriptname: '" + portal.getScriptName() + "' state: " + (portal.getPortalState() ? 1 : 0) + ".");
                 else player.dropMessage(6, "There is no portal on this map.");
                 break;
 
@@ -158,7 +156,10 @@ public class DebugCommand extends Command {
             case "marriage":
                 c.getChannelServer().debugMarriageStatus();
                 break;
-
+            
+            case "buff":
+                c.getPlayer().debugListAllBuffs();
+                break;
         }
     }
 }

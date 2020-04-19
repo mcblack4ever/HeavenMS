@@ -1,13 +1,12 @@
 package net.server.handlers.login;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import net.AbstractMaplePacketHandler;
 import net.server.Server;
-import net.server.coordinator.MapleSessionCoordinator;
-import net.server.coordinator.MapleSessionCoordinator.AntiMulticlientResult;
+import net.server.coordinator.session.MapleSessionCoordinator;
+import net.server.coordinator.session.MapleSessionCoordinator.AntiMulticlientResult;
 import net.server.world.World;
 import org.apache.mina.core.session.IoSession;
 import tools.MaplePacketCreator;
@@ -52,11 +51,6 @@ public class CharSelectedWithPicHandler extends AbstractMaplePacketHandler {
         c.updateHWID(hwid);
         
         IoSession session = c.getSession();
-        AntiMulticlientResult res = MapleSessionCoordinator.getInstance().attemptGameSession(session, c.getAccID(), hwid);
-        if (res != AntiMulticlientResult.SUCCESS) {
-            c.announce(MaplePacketCreator.getAfterLoginError(parseAntiMulticlientError(res)));
-            return;
-        }
         
         if (c.hasBannedMac() || c.hasBannedHWID()) {
             MapleSessionCoordinator.getInstance().closeSession(c.getSession(), true);
@@ -83,9 +77,14 @@ public class CharSelectedWithPicHandler extends AbstractMaplePacketHandler {
                 return;
             }
             
+            AntiMulticlientResult res = MapleSessionCoordinator.getInstance().attemptGameSession(session, c.getAccID(), hwid);
+            if (res != AntiMulticlientResult.SUCCESS) {
+                c.announce(MaplePacketCreator.getAfterLoginError(parseAntiMulticlientError(res)));
+                return;
+            }
+            
             server.unregisterLoginState(c);
-            c.updateLoginState(MapleClient.LOGIN_SERVER_TRANSITION);
-            server.setCharacteridInTransition((InetSocketAddress) c.getSession().getRemoteAddress(), charId);
+            c.setCharacterOnSessionTransitionState(charId);
             
             try {
                 c.announce(MaplePacketCreator.getServerIP(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1]), charId));

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -36,8 +36,14 @@ import provider.MapleDataTool;
  */
 public class MaplePlayerNPCFactory {
     
+    private static MapleDataProvider npcData = MapleDataProviderFactory.getDataProvider(new File("wz/Npc.wz"));
+    
     private static final Map<Integer, List<MaplePlayerNPC>> dnpcMaps = new HashMap<>();
     private static Integer runningDeveloperOid = 2147483000;  // 647 slots, long enough
+    
+    public static boolean isExistentScriptid(int scriptid) {
+        return npcData.getData(scriptid + ".img") != null;
+    }
     
     public static void loadDeveloperRoomMetadata(MapleDataProvider npc) {
         MapleData thisData = npc.getData("9977777.img");
@@ -60,7 +66,7 @@ public class MaplePlayerNPCFactory {
     }
     
     public static void loadFactoryMetadata() {
-        MapleDataProvider npc = MapleDataProviderFactory.getDataProvider(new File("wz/Npc.wz"));
+        MapleDataProvider npc = npcData;
         loadDeveloperRoomMetadata(npc);
 
         MapleDataProvider etc = MapleDataProviderFactory.getDataProvider(new File("wz/Etc.wz"));

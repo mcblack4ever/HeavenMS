@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 */
 package net.server.channel.handlers;
 
-import constants.GameConstants;
+import constants.game.GameConstants;
 import client.MapleClient;
 import net.AbstractMaplePacketHandler;
 import server.maps.MaplePlayerShop;

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -36,8 +36,8 @@ public class IgnoredCommand extends Command {
     @Override
     public void execute(MapleClient c, String[] params) {
         MapleCharacter player = c.getPlayer();
-        for (String ign : MapleLogger.ignored) {
-            player.yellowMessage(ign + " is being ignored.");
+        for (Integer cid : MapleLogger.ignored) {
+            player.yellowMessage(MapleCharacter.getNameById(cid) + " is being ignored.");
         }
     }
 }

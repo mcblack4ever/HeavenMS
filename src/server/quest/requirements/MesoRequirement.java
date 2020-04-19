@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -45,6 +45,11 @@ public class MesoRequirement extends MapleQuestRequirement {
 	
 	@Override
 	public boolean check(MapleCharacter chr, Integer npcid) {
-		return chr.getMeso() >= meso;
+                if (chr.getMeso() >= meso) {
+                        return true;
+                } else {
+                        chr.dropMessage(5, "You don't have enough mesos to complete this quest.");
+                        return false;
+                }
 	}
 }

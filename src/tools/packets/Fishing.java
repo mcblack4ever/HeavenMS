@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -20,9 +20,9 @@
 package tools.packets;
 
 import client.MapleCharacter;
-import constants.GameConstants;
-import constants.ItemConstants;
-import constants.ServerConstants;
+import config.YamlConfig;
+import constants.game.GameConstants;
+import constants.inventory.ItemConstants;
 import server.MapleItemInformationProvider;
 import tools.MaplePacketCreator;
 
@@ -56,7 +56,7 @@ public class Fishing {
     private static boolean hitFishingTime(MapleCharacter chr, int baitLevel, double yearLikelihood, double timeLikelihood) {
         double baitLikelihood = 0.0002 * chr.getWorldServer().getFishingRate() * baitLevel;   // can improve 10.0 at "max level 50000" on rate 1x
         
-        if (ServerConstants.USE_DEBUG) {
+        if (YamlConfig.config.server.USE_DEBUG) {
             chr.dropMessage(5, "----- FISHING RESULT -----");
             chr.dropMessage(5, "Likelihoods - Year: " + yearLikelihood + " Time: " + timeLikelihood + " Meso: " + baitLikelihood);
             chr.dropMessage(5, "Score rolls - Year: " + (0.23 * yearLikelihood) + " Time: " + (0.77 * timeLikelihood) + " Meso: " + baitLikelihood);
@@ -108,7 +108,7 @@ public class Fishing {
                     rewardStr = "a(n) " + MapleItemInformationProvider.getInstance().getName(itemid) + ".";
                     
                     if (chr.canHold(itemid)) {
-                        chr.getClient().getAbstractPlayerInteraction().gainItem(itemid, true);
+                        chr.getAbstractPlayerInteraction().gainItem(itemid, true);
                     } else {
                         chr.showHint("Couldn't catch a(n) #r" + MapleItemInformationProvider.getInstance().getName(itemid) + "#k due to #e#b" + ItemConstants.getInventoryType(itemid) + "#k#n inventory limit.");
                         rewardStr += ".. but has goofed up due to full inventory.";
@@ -125,9 +125,9 @@ public class Fishing {
     
     public static int getRandomItem(){ 
         int rand = (int)(100.0 * Math.random()); 
-        int[] commons = {1002851, 2002020, 2002020, 2000006, 2000018, 2002018, 2002024, 2002027, 2002027, 2000018, 2000018, 2000018 , 2000018, 2002030, 2002018, 2000016}; // filler' up 
+        int[] commons = {1002851, 2002020, 2002020, 2000006, 2000018, 2002018, 2002024, 2002027, 2002027, 2000018, 2000018, 2000018, 2000018, 2002030, 2002018, 2000016}; // filler' up 
         int[] uncommons = {1000025, 1002662, 1002812, 1002850, 1002881, 1002880, 1012072, 4020009, 2043220, 2043022, 2040543, 2044420, 2040943, 2043713, 2044220, 2044120, 2040429, 2043220, 2040943}; // filler' uptoo 
-        int[] rares = {1002859, 1002553, 01002762, 01002763, 01002764, 01002765, 01002766, 01002663, 1002788, 1002949, 2049100, 2340000, 2040822,2040822,2040822,2040822,2040822,2040822,2040822,2040822}; // filler' uplast 
+        int[] rares = {1002859, 1002553, 1002762, 1002763, 1002764, 1002765, 1002766, 1002663, 1002788, 1002949, 2049100, 2340000, 2040822, 2040822, 2040822, 2040822}; // filler' uplast 
         
         if(rand >= 25){ 
             return commons[(int)(commons.length * Math.random())]; 

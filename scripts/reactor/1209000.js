@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,10 @@
 */
 
 function act() {    // string visibility thanks to ProXAIMeRx & Glvelturall
-    if (rm.isQuestStarted(6400)) rm.setQuestProgress(6400, 0, 2);
-    rm.message("Real Bart has found. Return to Jonathan through portal.");
+    if (rm.isQuestStarted(6400)) {
+        rm.setQuestProgress(6400, 1, 2);
+        rm.setQuestProgress(6400, 6401, "q3");
+    }
+    
+    rm.message("Real Bart has been found. Return to Jonathan through the portal.");
 }

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -40,7 +40,16 @@ function action(mode, type, selection) {
     
                 if(status == 0) {
                         if(cm.isQuestStarted(3311)) {
-                                cm.setQuestProgress(3311, 0, 1);
+                                var progress = cm.getQuestProgressInt(3311);
+                                
+                                if (progress == 4) {
+                                        progress = 7;
+                                } else {
+                                        progress = 5;
+                                }
+                                
+                                cm.setQuestProgress(3311, progress);
+                                
                                 cm.sendOk("This is a mug picture of Dr. De Lang. It seems he is adorning a locket with the emblem of the Alcadno academy, he is a retainer of the Alcadno society.", 2);
                         }
                     

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,7 @@ function start(mode, type, selection) {
         if (status == 0) {
             if(qm.haveItem(2430014, 1)) {
                 qm.sendNext("It looks like you already have one #b#t2430014##k on your inventory.");
-                qm.dispose();
+                status = 1;
                 return;
             }
             
@@ -48,8 +48,9 @@ function start(mode, type, selection) {
             } else {
                 qm.gainItem(2430014, 1);
                 qm.forceCompleteQuest();
+                qm.dispose();
             }
-            
+        } else if (status == 2) {
             qm.dispose();
         }
     }

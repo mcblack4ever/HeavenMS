@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -50,13 +50,13 @@ function action(mode, type, selection) {
                         cm.getMap().broadcastMessage(MaplePacketCreator.playSound("orbis/" + harpSounds[cm.getNpc() - 2012027]));
                         
                         if(cm.isQuestStarted(3114)) {
-                                var idx = cm.getQuestProgress(3114, 7777);
+                                var idx = -1 * cm.getQuestProgressInt(3114);  // infoEx without infoNumber, must use one progress only, critical hit!
                                 
-                                if(idx != -1) {
+                                if(idx > -1) {
                                         var nextNote = harpSong[idx];
                                         
                                         if(harpNote != nextNote) {
-                                                cm.setQuestProgress(3114, 7777, 0);
+                                                cm.setQuestProgress(3114, 0);
 
                                                 cm.getPlayer().announce(MaplePacketCreator.showEffect("quest/party/wrong_kor"));
                                                 cm.getPlayer().announce(MaplePacketCreator.playSound("Party1/Failed"));
@@ -70,7 +70,7 @@ function action(mode, type, selection) {
 
                                                         if(idx == 45) {     // finished lullaby
                                                                 cm.message("Twinkle, twinkle, little star, how I wonder what you are.");
-                                                                cm.setQuestProgress(3114, 7777, -1);
+                                                                cm.setQuestProgress(3114, 42);
 
                                                                 cm.getPlayer().announce(MaplePacketCreator.showEffect("quest/party/clear"));
                                                                 cm.getPlayer().announce(MaplePacketCreator.playSound("Party1/Clear"));
@@ -88,7 +88,7 @@ function action(mode, type, selection) {
                                                         }
                                                 }
 
-                                                cm.setQuestProgress(3114, 7777, idx + 1);
+                                                cm.setQuestProgress(3114, -1 * (idx + 1));
                                         }
                                 }
                         }

@@ -30,7 +30,7 @@ import client.MapleCharacter;
 import client.MapleClient;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
-import server.MaplePortal;
+import server.maps.MaplePortal;
 import server.MapleTrade;
 import server.maps.MapleMap;
 import tools.FilePrinter;
@@ -61,11 +61,12 @@ public final class ChangeMapHandler extends AbstractMaplePacketHandler {
 			}
 			String[] socket = c.getChannelServer().getIP().split(":");
 			chr.getCashShop().open(false);
-			c.updateLoginState(MapleClient.LOGIN_SERVER_TRANSITION);
+			
+                        chr.setSessionTransitionState();
 			try {
 				c.announce(MaplePacketCreator.getChannelChange(InetAddress.getByName(socket[0]), Integer.parseInt(socket[1])));
 			} catch (UnknownHostException ex) {
-                            ex.printStackTrace();
+                                ex.printStackTrace();
 			}
 		} else {
 			if(chr.getCashShop().isOpened()) {
@@ -84,7 +85,7 @@ public final class ChangeMapHandler extends AbstractMaplePacketHandler {
                                         if (!chr.isAlive()) {
                                                 MapleMap map = chr.getMap();
                                                 if (wheel && chr.haveItemWithId(5510000, false)) {
-                                                        // thanks lucasziron for showing revivePlayer() also being triggered by Wheel
+                                                        // thanks lucasziron (lziron) for showing revivePlayer() triggering by Wheel
 
                                                         MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, 5510000, 1, true, false);
                                                         chr.announce(MaplePacketCreator.showWheelsLeft(chr.getItemQuantity(5510000, false)));

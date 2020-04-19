@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,7 @@ package client.command.commands.gm2;
 import client.command.Command;
 import client.MapleClient;
 import client.MapleCharacter;
-import constants.ServerConstants;
+import config.YamlConfig;
 
 public class SpCommand extends Command {
     {
@@ -44,7 +44,7 @@ public class SpCommand extends Command {
         if (params.length == 1) {
             int newSp = Integer.parseInt(params[0]);
             if (newSp < 0) newSp = 0;
-            else if (newSp > ServerConstants.MAX_AP) newSp = ServerConstants.MAX_AP;
+            else if (newSp > YamlConfig.config.server.MAX_AP) newSp = YamlConfig.config.server.MAX_AP;
 
             player.updateRemainingSp(newSp);
         } else {
@@ -52,7 +52,7 @@ public class SpCommand extends Command {
             if (victim != null) {
                 int newSp = Integer.parseInt(params[1]);
                 if (newSp < 0) newSp = 0;
-                else if (newSp > ServerConstants.MAX_AP) newSp = ServerConstants.MAX_AP;
+                else if (newSp > YamlConfig.config.server.MAX_AP) newSp = YamlConfig.config.server.MAX_AP;
 
                 victim.updateRemainingSp(newSp);
 

@@ -46,13 +46,16 @@ public enum ItemFactory {
     CASH_ARAN(5, true),
     MERCHANT(6, false),
     CASH_OVERALL(7, true),
-    MARRIAGE_GIFTS(8, false);
+    MARRIAGE_GIFTS(8, false),
+    DUEY(9, false);
     private final int value;
     private final boolean account;
-    private static final Lock locks[] = new Lock[200];  // thanks Masterrulax for pointing out a bottleneck issue here
+    
+    private static final int lockCount = 400;
+    private static final Lock locks[] = new Lock[lockCount];  // thanks Masterrulax for pointing out a bottleneck issue here
     
     static {
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < lockCount; i++) {
             locks[i] = MonitoredReentrantLockFactory.createLock(MonitoredLockType.ITEM, true);
         }
     }
@@ -75,7 +78,9 @@ public enum ItemFactory {
         saveItems(items, null, id, con);
     }
     
-    public synchronized void saveItems(List<Pair<Item, MapleInventoryType>> items, List<Short> bundlesList, int id, Connection con) throws SQLException {
+    public void saveItems(List<Pair<Item, MapleInventoryType>> items, List<Short> bundlesList, int id, Connection con) throws SQLException {
+        // thanks Arufonsu, MedicOP, BHB for pointing a "synchronized" bottleneck here
+        
         if(value != 6) saveItemsCommon(items, id, con);
         else saveItemsMerchant(items, bundlesList, id, con);
     }
@@ -92,7 +97,7 @@ public enum ItemFactory {
         equip.setInt((short) rs.getInt("int"));
         equip.setJump((short) rs.getInt("jump"));
         equip.setVicious((short) rs.getInt("vicious"));
-        equip.setFlag((byte) rs.getInt("flag"));
+        equip.setFlag((short) rs.getInt("flag"));
         equip.setLuk((short) rs.getInt("luk"));
         equip.setMatk((short) rs.getInt("matk"));
         equip.setMdef((short) rs.getInt("mdef"));
@@ -168,11 +173,16 @@ public enum ItemFactory {
                 if (mit.equals(MapleInventoryType.EQUIP) || mit.equals(MapleInventoryType.EQUIPPED)) {
                     items.add(new Pair<Item, MapleInventoryType>(loadEquipFromResultSet(rs), mit));
                 } else {
-                    Item item = new Item(rs.getInt("itemid"), (byte) rs.getInt("position"), (short) rs.getInt("quantity"), rs.getInt("petid"));
+                    int petid = rs.getInt("petid");
+                    if (rs.wasNull()) {
+                        petid = -1;
+                    }
+                    
+                    Item item = new Item(rs.getInt("itemid"), (byte) rs.getInt("position"), (short) rs.getInt("quantity"), petid);
                     item.setOwner(rs.getString("owner"));
                     item.setExpiration(rs.getLong("expiration"));
                     item.setGiftFrom(rs.getString("giftFrom"));
-                    item.setFlag((byte) rs.getInt("flag"));
+                    item.setFlag((short) rs.getInt("flag"));
                     items.add(new Pair<>(item, mit));
                 }
             }
@@ -199,7 +209,7 @@ public enum ItemFactory {
         PreparedStatement pse = null;
         ResultSet rs = null;
 
-        Lock lock = locks[id % 200];
+        Lock lock = locks[id % lockCount];
         lock.lock();
         try {
             StringBuilder query = new StringBuilder();
@@ -224,7 +234,7 @@ public enum ItemFactory {
                     ps.setInt(6, item.getPosition());
                     ps.setInt(7, item.getQuantity());
                     ps.setString(8, item.getOwner());
-                    ps.setInt(9, item.getPetId());
+                    ps.setInt(9, item.getPetId());      // thanks Daddy Egg for alerting a case of unique petid constraint breach getting raised
                     ps.setInt(10, item.getFlag());
                     ps.setLong(11, item.getExpiration());
                     ps.setString(12, item.getGiftFrom());
@@ -324,11 +334,16 @@ public enum ItemFactory {
                     items.add(new Pair<Item, MapleInventoryType>(loadEquipFromResultSet(rs), mit));
                 } else {
                     if(bundles > 0) {
-                        Item item = new Item(rs.getInt("itemid"), (byte) rs.getInt("position"), (short)(bundles * rs.getInt("quantity")), rs.getInt("petid"));
+                        int petid = rs.getInt("petid");
+                        if (rs.wasNull()) {
+                            petid = -1;
+                        }
+                        
+                        Item item = new Item(rs.getInt("itemid"), (byte) rs.getInt("position"), (short)(bundles * rs.getInt("quantity")), petid);
                         item.setOwner(rs.getString("owner"));
                         item.setExpiration(rs.getLong("expiration"));
                         item.setGiftFrom(rs.getString("giftFrom"));
-                        item.setFlag((byte) rs.getInt("flag"));
+                        item.setFlag((short) rs.getInt("flag"));
                         items.add(new Pair<>(item, mit));
                     }
                 }
@@ -365,7 +380,7 @@ public enum ItemFactory {
         PreparedStatement pse = null;
         ResultSet rs = null;
 
-        Lock lock = locks[id % 200];
+        Lock lock = locks[id % lockCount];
         lock.lock();
         try {
             ps = con.prepareStatement("DELETE FROM `inventorymerchant` WHERE `characterid` = ?");

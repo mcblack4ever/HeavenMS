@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -43,9 +43,12 @@ function writeFeatureTab_PQs() {
         addFeature("RnJPQ/HorntailPQ/TreasurePQ/ElnathPQ/HolidayPQ.");
         addFeature("CWKPQ as Expedition-based instance.");
         addFeature("Scarga/Horntail/Showa/Balrog/Zakum/Pinkbean.");
+        addFeature("Expeditions with entry-limit system available.");
         addFeature("GuildPQ & queue with multi-lobby system available.");
         addFeature("Brand-new PQs: BossRushPQ, CafePQ.");
         addFeature("Mu Lung Dojo.");
+        addFeature("Monster Carnival 1 & 2 - thanks Dragohe4rt & Jayd!");
+        addFeature("AriantPQ - thanks Dragohe4rt & Jayd!");
         addFeature("Capt. Latanica with party fighting the boss.");
         addFeature("Filled up missing obligatory event script methods.");
         addFeature("Secured uniquety of active lobby-name instances.");
@@ -55,25 +58,35 @@ function writeFeatureTab_Skills() {
         addFeature("Reviewed many skills, such as Steal and M. Door.");
         addFeature("Heal GMS-like: fixed HP gain & Heal skill packet.");
         addFeature("Improved battleship: HP visible and map-persistent.");
-        addFeature("Maker skill features properly developed.");
+        addFeature("Maker skill features developed - pckts thanks Arnah.");
         addFeature("Chair Mastery - map chair boosts HP/MP rec.");
         addFeature("Mu Lung Dojo skills functional.");
+        addFeature("M. Magnet on bosses no longer crash.");
+        addFeature("M. Magnet on fixed no longer crash - thanks shavit!");
+        addFeature("HP/MP consumption from skills triggers pet autopot.");
+        addFeature("Elemental weapon imbue visibility for other players.");
 }
 
 function writeFeatureTab_Quests() {
         addFeature("Doll house quest functional.");
         addFeature("Q. items required to start quests shows up properly.");
         addFeature("Quests are now rewarding items properly.");
+        addFeature("Items from starting quest reacquireable on NPC talk.");
         addFeature("Selection of rewards works properly.");
         addFeature("Loads of quests have been patched.");
         addFeature("Aran questline has been reviewed.");
         addFeature("Reviewed several 4th job skill questlines.");
         addFeature("Rewarding system now looks up for item stacking.");
         addFeature("3rd job quiz with all 40-question pool available.");
+        addFeature("Item raising functional.");
+        addFeature("Cleared issue with player movement during NPC talk.");
+        addFeature("Reviewed usage of quest progress data as requisite.");
 }
 
 function writeFeatureTab_PlayerSocialNetwork() {
+        addFeature("Party Search fully functional.");
         addFeature("Guild and Alliance system fully functional.");
+        addFeature("Guild contract system held in Guild Headquarters.");
         addFeature("Party for novices-only.");
         addFeature("P. members' HPBar accounts HP gain on equips.");
         addFeature("Thoroughly reviewed P. Shops and H. Merchants.");
@@ -85,6 +98,7 @@ function writeFeatureTab_PlayerSocialNetwork() {
         addFeature("Protected and improved face expression system.");
         addFeature("Automated support for Player NPCs and Hall of Fame.");
         addFeature("Engagement & Wedding system with ring effects.");
+        addFeature("Wedding Wishlists - thanks Dragohe4rt!");
         addFeature("Equipments displays to everyone it's level & EXP info.");
         addFeature("Further improved the existent minigame mechanics.");
         addFeature("Trade complete using handshake synchronization.");
@@ -108,6 +122,7 @@ function writeFeatureTab_CashItems() {
         addFeature("Reviewed an pet position issue within CASH inventory.");
         addFeature("Reviewed fashion-related contents, almost GMS-like.");
         addFeature("Plastic surgeons/stylists no longer stuck characters.");
+        addFeature("Reworked gachapon loots, website-lists lookalike.");
         addFeature("Scroll for Spikes on Shoes.");
         addFeature("Scroll for Cold Protection.");
         addFeature("Vega's spell.");
@@ -176,6 +191,8 @@ function writeFeatureTab_Playerpotentials() {
         addFeature("Character slots per world/server-wide.");
         addFeature("Optional cash shop inventory separated by classes.");
         addFeature("Players manage 'same-typed' invites exclusively.");
+        addFeature("Player buffs with conditional active effects.");
+        addFeature("Rock-paper-scissors minigame - thanks Arnah!");
 }
 
 function writeFeatureTab_Serverpotentials() {
@@ -188,6 +205,7 @@ function writeFeatureTab_Serverpotentials() {
         addFeature("Enhanced AP auto-assigner: focus on eqp demands.");
         addFeature("Enhanced inventory check: free slots smartly fetched.");
         addFeature("Enhanced petloot handler: no brute-force inv. checks.");
+        addFeature("Matching system: everyone's decision to trigger action.");
         addFeature("Players-appointed bestsellers for Owl and Cash Shop.");
         addFeature("Tweaked pet/mount hunger to a balanced growth rate.");
         addFeature("Consistent experience and meso gain system.");
@@ -203,6 +221,7 @@ function writeFeatureTab_Serverpotentials() {
         addFeature("Custom jail system.");
         addFeature("Custom buyback system, uses mesos / NX, via MTS.");
         addFeature("Custom fishing system having 'seasonal' catch times.");
+        addFeature("Actual fishing handling w/ F. Net - thanks Dragohe4rt!");
         addFeature("Custom map leasing system.");
         addFeature("Delete Character.");
         addFeature("Smooth view-all-char, now showing all account chars.");
@@ -216,6 +235,7 @@ function writeFeatureTab_Serverpotentials() {
         addFeature("SP cap past tier-level, recovered after job upgrade.");
         addFeature("Bypassable PIN/PIC system for authenticated users.");
         addFeature("Automatic account registration - thanks shavit!");
+        addFeature("Any NPC scriptable - thanks GabrielSin!");
 }
 
 function writeFeatureTab_Commands() {
@@ -236,6 +256,7 @@ function writeFeatureTab_CustomNPCs() {
         addFeature("Dalair: automatized equipment-merger.");
         addFeature("Donation Box: automatized item-buyer.");
         addFeature("Coco & Ace of Hearts: C. scroll crafters.");
+        addFeature("Barry (MapleTV): fill book & exchange items for scroll.");
 }
 
 function writeFeatureTab_Localhostedits() {
@@ -270,6 +291,7 @@ function writeFeatureTab_Project() {
         addFeature("Remodeled item scripts, properly using NPC dialogs.");
         addFeature("ThreadTracker: runtime tool for deadlock detection.");
         addFeature("Channel, World and Server-wide timer management.");
+        addFeature("Developed services as preemptive task scheduler.");
         addFeature("Thoroughly reviewed encapsulation for player stats.");
         addFeature("Heavily reviewed future task management, spawning much less threads and relieving task overload on the TimerManager.");
 }
@@ -281,7 +303,7 @@ function writeAllFeatures() {
                 feature_cursor = [];
 
                 var tabName = (tabs[i]).replace(re, "");
-                eval("writeFeatureTab_" + tabName)();
+                this["writeFeatureTab_" + tabName]();
         
                 feature_tree.push(feature_cursor);
         }
@@ -310,7 +332,7 @@ function action(mode, type, selection) {
                         status--;
                     
                 if (status == 0) {
-                        var sendStr = "HeavenMS was developed on the timespan of 3 years, based on where Solaxia left. I'm glad to say the development itself had continuously been agraciated by dozens of contributors and cheerers (truly thanks for the trusting vow, guys & gals!).\r\n\r\nTalking about results: many nice features emerged, development aimed to get back the old GMS experience. Now many of these so-long missing features are gracefully presented to you in the shape of this server. Long live MapleStory!!\r\n\r\nThese are the features from #bHeavenMS#k:\r\n\r\n";
+                        var sendStr = "HeavenMS was developed on the timespan of 4 years, based on where Solaxia left. I'm glad to say the development itself had continuously been agraciated by dozens of contributors and cheerers (truly thanks for the trusting vow, guys & gals!).\r\n\r\nTalking about results: many nice features emerged, development aimed to get back the old GMS experience. Now many of these so-long missing features are gracefully presented to you in the shape of this server. Long live MapleStory!!\r\n\r\nThese are the features from #bHeavenMS#k:\r\n\r\n";
                         for(var i = 0; i < tabs.length; i++) {
                             sendStr += "#L" + i + "##b" + tabs[i] + "#k#l\r\n";
                         }

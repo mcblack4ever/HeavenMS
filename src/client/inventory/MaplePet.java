@@ -21,7 +21,7 @@
 */
 package client.inventory;
 
-import constants.ExpTable;
+import constants.game.ExpTable;
 import java.awt.Point;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -102,12 +102,7 @@ public class MaplePet extends Item {
         try {
             Connection con = DatabaseConnection.getConnection();
             
-            PreparedStatement ps = con.prepareStatement("DELETE FROM pets WHERE `petid` = ?");
-            ps.setInt(1, petid);
-            ps.executeUpdate();
-            ps.close();
-            
-            ps = con.prepareStatement("DELETE FROM petignores WHERE `petid` = ?");  // thanks Vcoc for detecting petignores remaining after deletion
+            PreparedStatement ps = con.prepareStatement("DELETE FROM pets WHERE `petid` = ?");  // thanks Vcoc for detecting petignores remaining after deletion
             ps.setInt(1, petid);
             ps.executeUpdate();
             ps.close();

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -26,15 +26,15 @@
 
 function start() {
     if(cm.isQuestStarted(3367)) {
-        var c = cm.getQuestProgress(3367, 30);
-        if(c == 30) {
+        var c = cm.getQuestProgressInt(3367, 30);
+        if(c >= 30) {
             cm.sendNext("(All files have been organized. Report the found files to Yulete.)", 2);
             cm.dispose();
             return;
         }
         
         var book = (cm.getNpcObjectId() % 30);
-        var prog = cm.getQuestProgress(3367, book);
+        var prog = cm.getQuestProgressInt(3367, book);
         if(prog == 0) {
             c++;
             
@@ -45,7 +45,7 @@ function start() {
                     return;
                 } else {
                     cm.gainItem(4031797, 1);
-                    cm.setQuestProgress(3367, 31, cm.getQuestProgress(3367, 31) + 1);
+                    cm.setQuestProgress(3367, 31, cm.getQuestProgressInt(3367, 31) + 1);
                 }
             }
             

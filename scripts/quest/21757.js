@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -36,11 +36,10 @@ function end(mode, type, selection) {
         
         if (status == 0) {
             qm.sendNext("Oh, a letter for the #rempress#k? From the #bheroes#k?!");
-        } else {
+        } else if (status == 1) {
+            qm.forceCompleteQuest();
             qm.gainExp(1000);
             qm.gainItem(4032330, -1);
-            qm.forceCompleteQuest();
-            
             qm.dispose();
         }
     }

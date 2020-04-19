@@ -31,8 +31,8 @@ import client.inventory.MapleInventoryType;
 import client.inventory.MaplePet;
 import client.inventory.ModifyInventory;
 import client.newyear.NewYearCardRecord;
-import constants.ItemConstants;
-import constants.ServerConstants;
+import config.YamlConfig;
+import constants.inventory.ItemConstants;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ import tools.MaplePacketCreator;
 /**
  *
  * @author Matze
- * @author Ronan - improved check space feature & removed redundant object calls
+ * @author Ronan - improved check space feature and removed redundant object calls
  */
 public class MapleInventoryManipulator {
 
@@ -68,11 +68,21 @@ public class MapleInventoryManipulator {
         return addById(c, itemId, quantity, owner, petid, (byte) 0, expiration);
     }
 
-    public static boolean addById(MapleClient c, int itemId, short quantity, String owner, int petid, byte flag, long expiration) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-        MapleInventoryType type = ItemConstants.getInventoryType(itemId);
+    public static boolean addById(MapleClient c, int itemId, short quantity, String owner, int petid, short flag, long expiration) {
         MapleCharacter chr = c.getPlayer();
+        MapleInventoryType type = ItemConstants.getInventoryType(itemId);
+        
         MapleInventory inv = chr.getInventory(type);
+        inv.lockInventory();
+        try {
+            return addByIdInternal(c, chr, type, inv, itemId, quantity, owner, petid, flag, expiration);
+        } finally {
+            inv.unlockInventory();
+        }
+    }
+    
+    private static boolean addByIdInternal(MapleClient c, MapleCharacter chr, MapleInventoryType type, MapleInventory inv, int itemId, short quantity, String owner, int petid, short flag, long expiration) {
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         if (!type.equals(MapleInventoryType.EQUIP)) {
             short slotMax = ii.getSlotMax(c, itemId);
             List<Item> existing = inv.listById(itemId);
@@ -96,7 +106,7 @@ public class MapleInventoryManipulator {
                     }
                 }
                 boolean sandboxItem = (flag & ItemConstants.SANDBOX) == ItemConstants.SANDBOX;
-                while (quantity > 0 || ItemConstants.isRechargeable(itemId)) {
+                while (quantity > 0) {
                     short newQ = (short) Math.min(quantity, slotMax);
                     if (newQ != 0) {
                         quantity -= newQ;
@@ -114,9 +124,6 @@ public class MapleInventoryManipulator {
                         }
                         c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
                         if(sandboxItem) chr.setHasSandboxItem();
-                        if ((ItemConstants.isRechargeable(itemId)) && quantity == 0) {
-                            break;
-                        }
                     } else {
                         c.announce(MaplePacketCreator.enableActions());
                         return false;
@@ -166,19 +173,31 @@ public class MapleInventoryManipulator {
 
     public static boolean addFromDrop(MapleClient c, Item item, boolean show, int petId) {
         MapleCharacter chr = c.getPlayer();
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         MapleInventoryType type = item.getInventoryType();
-        if (ii.isPickupRestricted(item.getItemId()) && chr.haveItemWithId(item.getItemId(), true)) {
+        
+        MapleInventory inv = chr.getInventory(type);
+        inv.lockInventory();
+        try {
+            return addFromDropInternal(c, chr, type, inv, item, show, petId);
+        } finally {
+            inv.unlockInventory();
+        }
+    }
+    
+    private static boolean addFromDropInternal(MapleClient c, MapleCharacter chr, MapleInventoryType type, MapleInventory inv, Item item, boolean show, int petId) {
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        int itemid = item.getItemId();
+        if (ii.isPickupRestricted(itemid) && chr.haveItemWithId(itemid, true)) {
             c.announce(MaplePacketCreator.getInventoryFull());
             c.announce(MaplePacketCreator.showItemUnavailable());
             return false;
         }
         short quantity = item.getQuantity();
-        MapleInventory inv = chr.getInventory(type);
+
         if (!type.equals(MapleInventoryType.EQUIP)) {
-            short slotMax = ii.getSlotMax(c, item.getItemId());
-            List<Item> existing = inv.listById(item.getItemId());
-            if (!ItemConstants.isRechargeable(item.getItemId()) && petId == -1) {
+            short slotMax = ii.getSlotMax(c, itemid);
+            List<Item> existing = inv.listById(itemid);
+            if (!ItemConstants.isRechargeable(itemid) && petId == -1) {
                 if (existing.size() > 0) { // first update all existing slots to slotMax
                     Iterator<Item> i = existing.iterator();
                     while (quantity > 0) {
@@ -200,7 +219,7 @@ public class MapleInventoryManipulator {
                 while (quantity > 0) {
                     short newQ = (short) Math.min(quantity, slotMax);
                     quantity -= newQ;
-                    Item nItem = new Item(item.getItemId(), (short) 0, newQ, petId);
+                    Item nItem = new Item(itemid, (short) 0, newQ, petId);
                     nItem.setExpiration(item.getExpiration());
                     nItem.setOwner(item.getOwner());
                     nItem.setFlag(item.getFlag());
@@ -214,13 +233,13 @@ public class MapleInventoryManipulator {
                     nItem.setPosition(newSlot);
                     item.setPosition(newSlot);
                     c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                    if(MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
+                    if (MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
                 }
             } else {
-                Item nItem = new Item(item.getItemId(), (short) 0, quantity, petId);
+                Item nItem = new Item(itemid, (short) 0, quantity, petId);
                 nItem.setExpiration(item.getExpiration());
                 nItem.setFlag(item.getFlag());
-                
+
                 short newSlot = inv.addItem(nItem);
                 if (newSlot == -1) {
                     c.announce(MaplePacketCreator.getInventoryFull());
@@ -230,7 +249,7 @@ public class MapleInventoryManipulator {
                 nItem.setPosition(newSlot);
                 item.setPosition(newSlot);
                 c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
-                if(MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
+                if (MapleInventoryManipulator.isSandboxItem(nItem)) chr.setHasSandboxItem();
                 c.announce(MaplePacketCreator.enableActions());
             }
         } else if (quantity == 1) {
@@ -242,15 +261,15 @@ public class MapleInventoryManipulator {
             }
             item.setPosition(newSlot);
             c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, item))));
-            if(MapleInventoryManipulator.isSandboxItem(item)) chr.setHasSandboxItem();
+            if (MapleInventoryManipulator.isSandboxItem(item)) chr.setHasSandboxItem();
         } else {
-            FilePrinter.printError(FilePrinter.ITEM, "Tried to pickup Equip id " + item.getItemId() + " containing more than 1 quantity --> " + quantity);
+            FilePrinter.printError(FilePrinter.ITEM, "Tried to pickup Equip id " + itemid + " containing more than 1 quantity --> " + quantity);
             c.announce(MaplePacketCreator.getInventoryFull());
             c.announce(MaplePacketCreator.showItemUnavailable());
             return false;
         }
         if (show) {
-            c.announce(MaplePacketCreator.getShowItemGain(item.getItemId(), item.getQuantity()));
+            c.announce(MaplePacketCreator.getShowItemGain(itemid, item.getQuantity()));
         }
         return true;
     }
@@ -265,14 +284,22 @@ public class MapleInventoryManipulator {
         MapleCharacter chr = c.getPlayer();
         MapleInventory inv = chr.getInventory(type);
         
-        if(ii.isPickupRestricted(itemid) && haveItemWithId(inv, itemid)) {
-            return false;
+        if (ii.isPickupRestricted(itemid)) {
+            if (haveItemWithId(inv, itemid)) {
+                return false;
+            } else if (ItemConstants.isEquipment(itemid) && haveItemWithId(chr.getInventory(MapleInventoryType.EQUIPPED), itemid)) {
+                return false;
+            }
         }
         
         if (!type.equals(MapleInventoryType.EQUIP)) {
             short slotMax = ii.getSlotMax(c, itemid);
             List<Item> existing = inv.listById(itemid);
-            if (!ItemConstants.isRechargeable(itemid)) {
+            
+            final int numSlotsNeeded;
+            if (ItemConstants.isRechargeable(itemid)) {
+                numSlotsNeeded = 1;
+            } else {
                 if (existing.size() > 0) // first update all existing slots to slotMax
                 {
                     for (Item eItem : existing) {
@@ -286,15 +313,14 @@ public class MapleInventoryManipulator {
                         }
                     }
                 }
+                
+                if (slotMax > 0) {
+                    numSlotsNeeded = (int) (Math.ceil(((double) quantity) / slotMax));
+                } else {
+                    numSlotsNeeded = 1;
+                }
             }
-            final int numSlotsNeeded;
-            if (slotMax > 0) {
-                numSlotsNeeded = (int) (Math.ceil(((double) quantity) / slotMax));
-            } else if (ItemConstants.isRechargeable(itemid)) {
-                numSlotsNeeded = 1;
-            } else {
-                numSlotsNeeded = 1;
-            }
+            
             return !inv.isFull(numSlotsNeeded - 1);
         } else {
             return !inv.isFull();
@@ -313,13 +339,21 @@ public class MapleInventoryManipulator {
         MapleCharacter chr = c.getPlayer();
         MapleInventory inv = chr.getInventory(type);
         
-        if(ii.isPickupRestricted(itemid) && haveItemWithId(inv, itemid)) {
-            return 0;
+        if (ii.isPickupRestricted(itemid)) {
+            if (haveItemWithId(inv, itemid)) {
+                return 0;
+            } else if (ItemConstants.isEquipment(itemid) && haveItemWithId(chr.getInventory(MapleInventoryType.EQUIPPED), itemid)) {
+                return 0;   // thanks Captain & Aika & Vcoc for pointing out inventory checkup on player trades missing out one-of-a-kind items.
+            }
         }
         
         if (!type.equals(MapleInventoryType.EQUIP)) {
             short slotMax = ii.getSlotMax(c, itemid);
-            if (!ItemConstants.isRechargeable(itemid)) {
+            final int numSlotsNeeded;
+            
+            if (ItemConstants.isRechargeable(itemid)) {
+                numSlotsNeeded = 1;
+            } else {
                 List<Item> existing = inv.listById(itemid);
                 
                 if (existing.size() > 0) // first update all existing slots to slotMax
@@ -335,14 +369,12 @@ public class MapleInventoryManipulator {
                         }
                     }
                 }
-            }
-            final int numSlotsNeeded;
-            if (slotMax > 0) {
-                numSlotsNeeded = (int) (Math.ceil(((double) quantity) / slotMax));
-            } else if (ItemConstants.isRechargeable(itemid)) {
-                numSlotsNeeded = 1;
-            } else {
-                numSlotsNeeded = 1;
+                
+                if (slotMax > 0) {
+                    numSlotsNeeded = (int) (Math.ceil(((double) quantity) / slotMax));
+                } else {
+                    numSlotsNeeded = 1;
+                }
             }
             
             returnValue = ((numSlotsNeeded + usedSlots) << 1);
@@ -379,7 +411,7 @@ public class MapleInventoryManipulator {
             announceModifyInventory(c, item, fromDrop, allowZero);
         } else {
             int petid = item.getPetId();
-            if (petid > -1) { // thanks Vcoc for finding a d/c issue with equipped pets & pets remaining on DB here
+            if (petid > -1) { // thanks Vcoc for finding a d/c issue with equipped pets and pets remaining on DB here
                 int petIdx = chr.getPetIndex(petid);
                 if(petIdx > -1) {
                     MaplePet pet = chr.getPet(petIdx);
@@ -391,7 +423,7 @@ public class MapleInventoryManipulator {
                     announceModifyInventory(c, item, fromDrop, allowZero);
                 }
                 
-                MaplePet.deleteFromDb(chr, petid);
+                // thanks Robin Schulz for noticing pet issues when moving pets out of inventory
             } else {
                 inv.removeItem(slot, quantity, allowZero);
                 if(type != MapleInventoryType.CANHOLD) {
@@ -430,7 +462,7 @@ public class MapleInventoryManipulator {
             }
         }
         if (removeQuantity > 0 && type != MapleInventoryType.CANHOLD) {
-            throw new RuntimeException("[HACK] Not enough items available of Item:" + itemId + ", Quantity (After Quantity/Over Current Quantity): " + (quantity - removeQuantity) + "/" + quantity);
+            throw new RuntimeException("[Hack] Not enough items available of Item:" + itemId + ", Quantity (After Quantity/Over Current Quantity): " + (quantity - removeQuantity) + "/" + quantity);
         }
     }
 
@@ -491,7 +523,10 @@ public class MapleInventoryManipulator {
         }
         boolean itemChanged = false;
         if (ii.isUntradeableOnEquip(source.getItemId())) {
-            source.setFlag((byte) ItemConstants.UNTRADEABLE);
+            short flag = source.getFlag();      // thanks BHB for noticing flags missing after equipping these
+            flag |= ItemConstants.UNTRADEABLE;
+            source.setFlag(flag);
+            
             itemChanged = true;
         }
         if (dst == -6) { // unequip the overall
@@ -630,9 +665,27 @@ public class MapleInventoryManipulator {
         c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(2, source, src))));
         chr.equipChanged();
     }
+    
+    private static boolean isDisappearingItemDrop(Item it) {
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        if (ii.isDropRestricted(it.getItemId())) {
+            return true;
+        } else if (ii.isCash(it.getItemId())) {
+            if (YamlConfig.config.server.USE_ENFORCE_UNMERCHABLE_CASH) {     // thanks Ari for noticing cash drops not available server-side
+                return true;
+            } else if (ItemConstants.isPet(it.getItemId()) && YamlConfig.config.server.USE_ENFORCE_UNMERCHABLE_PET) {
+                return true;
+            }
+        } else if (isDroppedItemRestricted(it)) {
+            return true;
+        } else if (ItemConstants.isWeddingRing(it.getItemId())) {
+            return true;
+        }
+        
+        return false;
+    }
 
     public static void drop(MapleClient c, MapleInventoryType type, short src, short quantity) {
-        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         if (src < 0) {
             type = MapleInventoryType.EQUIPPED;
         }
@@ -645,22 +698,21 @@ public class MapleInventoryManipulator {
         	return;
         }
         int itemId = source.getItemId();
-        if (ItemConstants.isPet(itemId)) {
-            return;
-        }
         
         MapleMap map = chr.getMap();
-        if (chr.getItemEffect() == itemId && source.getQuantity() == 1) {
-            chr.setItemEffect(0);
-            map.broadcastMessage(MaplePacketCreator.itemEffect(chr.getId(), 0));
-        } else if (itemId == 5370000 || itemId == 5370001) {
-            if (chr.getItemQuantity(itemId, false) == 1) {
-                chr.setChalkboard(null);
-            }
-        }
         if ((!ItemConstants.isRechargeable(itemId) && source.getQuantity() < quantity) || quantity < 0) {
             return;
         }
+        
+        int petid = source.getPetId();
+        if (petid > -1) {
+            int petIdx = chr.getPetIndex(petid);
+            if(petIdx > -1) {
+                MaplePet pet = chr.getPet(petIdx);
+                chr.unequipPet(pet, true);
+            }
+        }
+        
         Point dropPos = new Point(chr.getPosition());
         if (quantity < source.getQuantity() && !ItemConstants.isRechargeable(itemId)) {
             Item target = source.copy();
@@ -668,7 +720,7 @@ public class MapleInventoryManipulator {
             source.setQuantity((short) (source.getQuantity() - quantity));
             c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(1, source))));
             
-            if(ItemConstants.isNewYearCardEtc(itemId)) {
+            if (ItemConstants.isNewYearCardEtc(itemId)) {
                 if(itemId == 4300000) {
                     NewYearCardRecord.removeAllNewYearCard(true, chr);
                     c.getAbstractPlayerInteraction().removeAll(4300000);
@@ -676,15 +728,9 @@ public class MapleInventoryManipulator {
                     NewYearCardRecord.removeAllNewYearCard(false, chr);
                     c.getAbstractPlayerInteraction().removeAll(4301000);
                 }
-            } else if (ItemConstants.isWeddingRing(source.getItemId())) {
-                map.disappearingItemDrop(chr, chr, target, dropPos);
-            } else if (map.getEverlast()) {
-                if (ii.isDropRestricted(target.getItemId()) || ii.isCash(target.getItemId()) || isDroppedItemRestricted(target)) {
-                    map.disappearingItemDrop(chr, chr, target, dropPos);
-                } else {
-                    map.spawnItemDrop(chr, chr, target, dropPos, true, true);
-                }
-            } else if (ii.isDropRestricted(target.getItemId()) || ii.isCash(target.getItemId()) || isDroppedItemRestricted(target)) {
+            }
+            
+            if (isDisappearingItemDrop(target)) {
                 map.disappearingItemDrop(chr, chr, target, dropPos);
             } else {
                 map.spawnItemDrop(chr, chr, target, dropPos, true, true);
@@ -705,8 +751,8 @@ public class MapleInventoryManipulator {
             c.announce(MaplePacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(3, source))));
             if (src < 0) {
                 chr.equipChanged();
-            } else if(ItemConstants.isNewYearCardEtc(itemId)) {
-                if(itemId == 4300000) {
+            } else if (ItemConstants.isNewYearCardEtc(itemId)) {
+                if (itemId == 4300000) {
                     NewYearCardRecord.removeAllNewYearCard(true, chr);
                     c.getAbstractPlayerInteraction().removeAll(4300000);
                 } else {
@@ -715,22 +761,30 @@ public class MapleInventoryManipulator {
                 }
             }
             
-            if (map.getEverlast()) {
-                if (ii.isDropRestricted(itemId) || ii.isCash(itemId) || isDroppedItemRestricted(source)) {
-                    map.disappearingItemDrop(chr, chr, source, dropPos);
-                } else {
-                    map.spawnItemDrop(chr, chr, source, dropPos, true, true);
-                }
-            } else if (ii.isDropRestricted(itemId) || ii.isCash(itemId) || isDroppedItemRestricted(source)) {
-                map.disappearingItemDrop(chr, chr, source, dropPos);           
+            if (isDisappearingItemDrop(source)) {
+                map.disappearingItemDrop(chr, chr, source, dropPos);
             } else {
                 map.spawnItemDrop(chr, chr, source, dropPos, true, true);
             }
         }
+        
+        int quantityNow = chr.getItemQuantity(itemId, false);
+        if (itemId == chr.getItemEffect()) {
+            if (quantityNow <= 0) {
+                chr.setItemEffect(0);
+                map.broadcastMessage(MaplePacketCreator.itemEffect(chr.getId(), 0));
+            }
+        } else if (itemId == 5370000 || itemId == 5370001) {
+            if (source.getQuantity() <= 0) {
+                chr.setChalkboard(null);
+            }
+        } else if (itemId == 4031868) {
+            chr.updateAriantScore(quantityNow);
+        }
     }
 
     private static boolean isDroppedItemRestricted(Item it) {
-        return ServerConstants.USE_ERASE_UNTRADEABLE_DROP && it.isUntradeable();
+        return YamlConfig.config.server.USE_ERASE_UNTRADEABLE_DROP && it.isUntradeable();
     }
     
     public static boolean isSandboxItem(Item it) {

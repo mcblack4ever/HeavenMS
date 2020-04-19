@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -42,7 +42,7 @@ function start(mode, type, selection) {
             qm.sendNextPrev("It seems like something strange is happening in Orbis in Ossyria. It's a bit different from when we were dealing with the puppeteer, but my instincts tell me it has to do with the Black Wings. Please head over to Orbis.");
         } else if(status == 3) {
             qm.sendAcceptDecline("#bLisa the Fairy#k in Orbis should know a thing or two. Go see Lisa first, she knows someone that knows the whereabouts of the sealing stone. That person #rwill require a password from you#k, when requested use the #bThere's something strange going on in Orbis....#k keyword to talk to her. Understood?");
-        } else {
+        } else if(status == 4) {
             qm.forceStartQuest();
             qm.dispose();
         }

@@ -22,7 +22,7 @@
 
 package server.expeditions;
 
-import constants.ServerConstants;
+import config.YamlConfig;
 
 /**
 *
@@ -39,6 +39,9 @@ public enum MapleExpeditionType {
     HORNTAIL(6, 30, 100, 255, 5),
     CHAOS_ZAKUM(6, 30, 120, 255, 5),
     CHAOS_HORNTAIL(6, 30, 120, 255, 5),
+    ARIANT(2, 7, 20, 30, 5),
+    ARIANT1(2, 7, 20, 30, 5),
+    ARIANT2(2, 7, 20, 30, 5),
     PINKBEAN(6, 30, 120, 255, 5),
     CWKPQ(6, 30, 90, 255, 5);   // CWKPQ min-level 90, found thanks to Cato
     
@@ -57,7 +60,7 @@ public enum MapleExpeditionType {
     }
 
     public int getMinSize() {
-    	return !ServerConstants.USE_ENABLE_SOLO_EXPEDITIONS ? minSize : 1;
+    	return !YamlConfig.config.server.USE_ENABLE_SOLO_EXPEDITIONS ? minSize : 1;
     }
     
     public int getMaxSize() {

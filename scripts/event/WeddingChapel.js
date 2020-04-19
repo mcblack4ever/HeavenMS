@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -110,7 +110,7 @@ function respawnStages(eim) {
 function playerEntry(eim, player) {
         eim.setProperty("giftedItemG" + player.getId(), "0");
         eim.setProperty("giftedItemB" + player.getId(), "0");
-        player.getClient().getAbstractPlayerInteraction().gainItem(4000313, 1);
+        player.getAbstractPlayerInteraction().gainItem(4000313, 1);
         
         var map = eim.getMapInstance(entryMap);
         player.changeMap(map, map.getPortal(0));

@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,7 @@ function enter(pi) {
         return false;
     } else {
         if (pi.isQuestStarted(6410)) {
-            pi.setQuestProgress(6410, 0, 1);
+            pi.setQuestProgress(6410, 6411, "p2");
         }
         
         pi.playPortalSound();

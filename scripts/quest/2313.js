@@ -1,5 +1,5 @@
 /* ===========================================================
-			Resonance
+        @author Resonance
 	NPC Name: 		Head Patrol Officer
 	Map(s): 		Mushroom Castle: Corner of Mushroom Forest(106020000)
 	Description: 	Quest -  The Story Behind the Case
@@ -25,11 +25,12 @@ function start(mode, type, selection) {
 	}
 	if (status == 0)
 		qm.sendAcceptDecline("I have told our #bMinister of Home Affairs#k of your abilities. Please go pay a visit to him immediately.");
-	if (status == 1){
+	else if (status == 1){
 		qm.forceStartQuest();
 		qm.sendOk("Save our kingdom! We believe in you!");
-		qm.dispose();
-	}
+	} else if (status == 2){
+                qm.dispose();
+        }
 }
 
 function end(mode, type, selection) {

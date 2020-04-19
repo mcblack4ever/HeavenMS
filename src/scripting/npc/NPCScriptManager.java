@@ -29,8 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.script.Invocable;
 import javax.script.ScriptException;
+
+import jdk.nashorn.api.scripting.NashornScriptEngine;
 import net.server.world.MaplePartyCharacter;
 
 import scripting.AbstractScriptManager;
@@ -51,12 +52,12 @@ public class NPCScriptManager extends AbstractScriptManager {
     }
 
     private Map<MapleClient, NPCConversationManager> cms = new HashMap<>();
-    private Map<MapleClient, Invocable> scripts = new HashMap<>();
+    private Map<MapleClient, NashornScriptEngine> scripts = new HashMap<>();
 
     public boolean isNpcScriptAvailable(MapleClient c, String fileName) {
-        Invocable iv = null;
+        NashornScriptEngine iv = null;
         if (fileName != null) {
-            iv = getInvocable("npc/" + fileName + ".js", c);
+            iv = getScriptEngine("npc/" + fileName + ".js", c);
         }
 
         return iv != null;
@@ -90,30 +91,19 @@ public class NPCScriptManager extends AbstractScriptManager {
                 return;
             }
             cms.put(c, cm);
-            Invocable iv = null;
-            iv = getInvocable("npc/" + filename + ".js", c);
-            NPCScriptManager npcsm = NPCScriptManager.getInstance();
+            NashornScriptEngine iv = getScriptEngine("npc/" + filename + ".js", c);
 
-            if (iv == null || NPCScriptManager.getInstance() == null) {
-                c.getPlayer().dropMessage(1, npc + "");
+            if (iv == null) {
+                c.getPlayer().dropMessage(1, "NPC " + npc + " is uncoded.");
                 cm.dispose();
                 return;
             }
-            if (iv == null || npcsm == null) {
-                c.getPlayer().dropMessage(1, npc + "");
-                cm.dispose();
-                return;
-            }
-            engine.put("cm", cm);
+            iv.put("cm", cm);
             scripts.put(c, iv);
             try {
                 iv.invokeFunction("start", chrs);
             } catch (final NoSuchMethodException nsme) {
-                try {
-                    iv.invokeFunction("start", chrs);
-                } catch (final NoSuchMethodException nsma) {
-                    nsma.printStackTrace();
-                }
+                nsme.printStackTrace();
             }
 
         } catch (final UndeclaredThrowableException ute) {
@@ -133,25 +123,25 @@ public class NPCScriptManager extends AbstractScriptManager {
             }
             if (c.canClickNPC()) {
                 cms.put(c, cm);
-                Invocable iv = null;
+                NashornScriptEngine iv = null;
                 if (!itemScript) {
                     if (fileName != null) {
-                        iv = getInvocable("npc/" + fileName + ".js", c);
+                        iv = getScriptEngine("npc/" + fileName + ".js", c);
                     }
                 } else {
                     if (fileName != null) {     // thanks MiLin for drafting NPC-based item scripts
-                        iv = getInvocable("item/" + fileName + ".js", c);
+                        iv = getScriptEngine("item/" + fileName + ".js", c);
                     }
                 }
                 if (iv == null) {
-                    iv = getInvocable("npc/" + npc + ".js", c);
+                    iv = getScriptEngine("npc/" + npc + ".js", c);
                     cm.resetItemScript();
                 }
-                if (iv == null || NPCScriptManager.getInstance() == null) {
+                if (iv == null) {
                     dispose(c);
                     return false;
                 }
-                engine.put(engineName, cm);
+                iv.put(engineName, cm);
                 scripts.put(c, iv);
                 c.setClickedNPC();
                 try {
@@ -166,7 +156,6 @@ public class NPCScriptManager extends AbstractScriptManager {
             } else {
                 c.announce(MaplePacketCreator.enableActions());
             }
-
             return true;
         } catch (final UndeclaredThrowableException | ScriptException ute) {
             FilePrinter.printError(FilePrinter.NPC + npc + ".txt", ute);
@@ -182,7 +171,7 @@ public class NPCScriptManager extends AbstractScriptManager {
     }
 
     public void action(MapleClient c, byte mode, byte type, int selection) {
-        Invocable iv = scripts.get(c);
+        NashornScriptEngine iv = scripts.get(c);
         if (iv != null) {
             try {
                 c.setClickedNPC();
@@ -209,6 +198,8 @@ public class NPCScriptManager extends AbstractScriptManager {
         } else {
             resetContext(scriptFolder + "/" + cm.getNpc() + ".js", c);
         }
+        
+        c.getPlayer().flushDelayedUpdateQuests();
     }
 
     public void dispose(MapleClient c) {

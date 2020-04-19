@@ -22,7 +22,7 @@
 /**
 	Assistant Nancy
 -- By ---------------------------------------------------------------------------------------------
-	Angel (get31720 ragezone)
+	Angel (get31720)
 -- Version Info -----------------------------------------------------------------------------------
 	1.0 - First Version by Angel
         2.0 - Second Version by happydud3 & XotiCraze
@@ -111,7 +111,7 @@ function action(mode, type, selection) {
     } else if (status == 1) {
         var cmPartner;
         try {
-            cmPartner = cm.getMap().getCharacterById(cm.getPlayer().getPartnerId()).getClient().getAbstractPlayerInteraction();
+            cmPartner = cm.getMap().getCharacterById(cm.getPlayer().getPartnerId()).getAbstractPlayerInteraction();
         } catch(err) {
             cmPartner = null;
         }

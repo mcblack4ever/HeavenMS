@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@ import client.inventory.Equip;
 import client.inventory.Item;
 import client.inventory.MapleInventoryType;
 import client.inventory.manipulator.MapleInventoryManipulator;
-import constants.ItemConstants;
+import constants.inventory.ItemConstants;
 import server.MapleItemInformationProvider;
 
 public class ProItemCommand extends Command {
@@ -84,7 +84,7 @@ public class ProItemCommand extends Command {
         equip.setHp(stat);
         equip.setMp(stat);
 
-        byte flag = equip.getFlag();
+        short flag = equip.getFlag();
         flag |= ItemConstants.UNTRADEABLE;
         equip.setFlag(flag);
     }

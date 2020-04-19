@@ -37,7 +37,7 @@ import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
 import tools.Pair;
 import client.MapleCharacter;
 import client.MapleClient;
-import constants.ItemConstants;
+import constants.inventory.ItemConstants;
 import server.MapleItemInformationProvider;
 import client.inventory.manipulator.MapleInventoryManipulator;
 import tools.FilePrinter;
@@ -83,6 +83,19 @@ public class MapleInventory implements Iterable<Item> {
     public void setSlotLimit(int newLimit) {
         lock.lock();
         try {
+            if (newLimit < slotLimit) {
+                List<Short> toRemove = new LinkedList<>();
+                for (Item it : list()) {
+                    if (it.getPosition() > newLimit) {
+                        toRemove.add(it.getPosition());
+                    }
+                }
+                
+                for (Short slot : toRemove) {
+                    removeSlot(slot);
+                }
+            }
+            
             slotLimit = (byte) newLimit;
         } finally {
             lock.unlock();
@@ -435,6 +448,20 @@ public class MapleInventory implements Iterable<Item> {
         }
     }
     
+    private static boolean checkItemRestricted(List<Pair<Item, MapleInventoryType>> items) {
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        
+        // thanks Shavit for noticing set creation that would be only effective in rare situations
+        for (Pair<Item, MapleInventoryType> p : items) {
+            int itemid = p.getLeft().getItemId();
+            if (ii.isPickupRestricted(itemid) && p.getLeft().getQuantity() > 1) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     public static boolean checkSpot(MapleCharacter chr, Item item) {    // thanks Vcoc for noticing pshops not checking item stacks when taking item back
         return checkSpot(chr, Collections.singletonList(item));
     }
@@ -463,31 +490,45 @@ public class MapleInventory implements Iterable<Item> {
     public static boolean checkSpots(MapleCharacter chr, List<Pair<Item, MapleInventoryType>> items, List<Integer> typesSlotsUsed, boolean useProofInv) {
         // assumption: no "UNDEFINED" or "EQUIPPED" items shall be tested here, all counts are >= 0.
         
-        Map<Integer, Short> rcvItems = new LinkedHashMap<>();
+        if (!checkItemRestricted(items)) {
+            return false;
+        }
+        
+        Map<Integer, List<Integer>> rcvItems = new LinkedHashMap<>();
         Map<Integer, Byte> rcvTypes = new LinkedHashMap<>();
         
         for (Pair<Item, MapleInventoryType> item : items) {
                 Integer itemId = item.left.getItemId();
-                Short qty = rcvItems.get(itemId);
+                List<Integer> qty = rcvItems.get(itemId);
             
     		if(qty == null) {
-                        rcvItems.put(itemId, item.left.getQuantity());
+                        List<Integer> itemQtyList = new LinkedList<>();
+                        itemQtyList.add((int) item.left.getQuantity());
+                    
+                        rcvItems.put(itemId, itemQtyList);
                         rcvTypes.put(itemId, item.right.getType());
                 } else {
-                        rcvItems.put(itemId, (short)(qty + item.left.getQuantity()));
+                        if (!ItemConstants.isEquipment(itemId) && !ItemConstants.isRechargeable(itemId)) {
+                                qty.set(0, qty.get(0) + item.left.getQuantity());
+                        } else {
+                                qty.add((int) item.left.getQuantity());
+                        }
                 }
     	}
         
         MapleClient c = chr.getClient();
-        for(Entry<Integer, Short> it: rcvItems.entrySet()) {
+        for(Entry<Integer, List<Integer>> it: rcvItems.entrySet()) {
                 int itemType = rcvTypes.get(it.getKey()) - 1;
-                int usedSlots = typesSlotsUsed.get(itemType);
                 
-                int result = MapleInventoryManipulator.checkSpaceProgressively(c, it.getKey(), it.getValue(), "", usedSlots, useProofInv);
-                boolean hasSpace = ((result % 2) != 0);
-                
-                if(!hasSpace) return false;
-                typesSlotsUsed.set(itemType, (result >> 1));
+                for (Integer itValue : it.getValue()) {
+                        int usedSlots = typesSlotsUsed.get(itemType);
+                        
+                        int result = MapleInventoryManipulator.checkSpaceProgressively(c, it.getKey(), itValue, "", usedSlots, useProofInv);
+                        boolean hasSpace = ((result % 2) != 0);
+
+                        if(!hasSpace) return false;
+                        typesSlotsUsed.set(itemType, (result >> 1));
+                }
         }
         
     	return true;
@@ -525,38 +566,52 @@ public class MapleInventory implements Iterable<Item> {
     public static boolean checkSpotsAndOwnership(MapleCharacter chr, List<Pair<Item, MapleInventoryType>> items, List<Integer> typesSlotsUsed, boolean useProofInv) {
         //assumption: no "UNDEFINED" or "EQUIPPED" items shall be tested here, all counts are >= 0 and item list to be checked is a legal one.
         
-        Map<Long, Short> rcvItems = new LinkedHashMap<>();
+        if (!checkItemRestricted(items)) {
+            return false;
+        }
+        
+        Map<Long, List<Integer>> rcvItems = new LinkedHashMap<>();
         Map<Long, Byte> rcvTypes = new LinkedHashMap<>();
         Map<Long, String> rcvOwners = new LinkedHashMap<>();
         
         for (Pair<Item, MapleInventoryType> item : items) {
                 Long itemHash = hashKey(item.left.getItemId(), item.left.getOwner());
-                Short qty = rcvItems.get(itemHash);
+                List<Integer> qty = rcvItems.get(itemHash);
             
     		if(qty == null) {
-                        rcvItems.put(itemHash, item.left.getQuantity());
+                        List<Integer> itemQtyList = new LinkedList<>();
+                        itemQtyList.add((int) item.left.getQuantity());
+                    
+                        rcvItems.put(itemHash, itemQtyList);
                         rcvTypes.put(itemHash, item.right.getType());
                         rcvOwners.put(itemHash, item.left.getOwner());
                 } else {
-                        rcvItems.put(itemHash, (short)(qty + item.left.getQuantity()));
+                         // thanks BHB88 for pointing out an issue with rechargeable items being stacked on inventory check
+                        if (!ItemConstants.isEquipment(item.left.getItemId()) && !ItemConstants.isRechargeable(item.left.getItemId())) {
+                                qty.set(0, qty.get(0) + item.left.getQuantity());
+                        } else {
+                                qty.add((int) item.left.getQuantity());
+                        }
                 }
     	}
         
         MapleClient c = chr.getClient();
-        for(Entry<Long, Short> it: rcvItems.entrySet()) {
+        for(Entry<Long, List<Integer>> it: rcvItems.entrySet()) {
                 int itemType = rcvTypes.get(it.getKey()) - 1;
-                int usedSlots = typesSlotsUsed.get(itemType);
+                int itemId = (int) (it.getKey() >> 32L);
                 
-                Long itemId = it.getKey() >> 32L;
-                
-                //System.out.print("inserting " + itemId.intValue() + " with type " + itemType + " qty " + it.getValue() + " owner '" + rcvOwners.get(it.getKey()) + "' current usedSlots:");
-                //for(Integer i : typesSlotsUsed) System.out.print(" " + i);
-                int result = MapleInventoryManipulator.checkSpaceProgressively(c, itemId.intValue(), it.getValue(), rcvOwners.get(it.getKey()), usedSlots, useProofInv);
-                boolean hasSpace = ((result % 2) != 0);
-                //System.out.print(" -> hasSpace: " + hasSpace + " RESULT : " + result + "\n");
-                
-                if(!hasSpace) return false;
-                typesSlotsUsed.set(itemType, (result >> 1));
+                for (Integer itValue : it.getValue()) {
+                        int usedSlots = typesSlotsUsed.get(itemType);
+                        
+                        //System.out.print("inserting " + itemId.intValue() + " with type " + itemType + " qty " + it.getValue() + " owner '" + rcvOwners.get(it.getKey()) + "' current usedSlots:");
+                        //for(Integer i : typesSlotsUsed) System.out.print(" " + i);
+                        int result = MapleInventoryManipulator.checkSpaceProgressively(c, itemId, itValue, rcvOwners.get(it.getKey()), usedSlots, useProofInv);
+                        boolean hasSpace = ((result % 2) != 0);
+                        //System.out.print(" -> hasSpace: " + hasSpace + " RESULT : " + result + "\n");
+
+                        if(!hasSpace) return false;
+                        typesSlotsUsed.set(itemType, (result >> 1));
+                }
         }
         
     	return true;
@@ -614,5 +669,9 @@ public class MapleInventory implements Iterable<Item> {
     
     public void unlockInventory() {
         lock.unlock();
+    }
+    
+    public void dispose() {
+        owner = null;
     }
 }

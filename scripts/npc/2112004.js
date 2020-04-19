@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ function action(mode, type, selection) {
                         if(status == 0) {
                                 cm.sendYesNo("We must keep fighting to save Juliet, please keep your pace. If you are not feeling so well to continue, your companions and I will understand... So, are you going to retreat?");
                         } else if(status == 1) {
-                                cm.warp(926100700);
+                                cm.warp(926100700, 0);
                                 cm.dispose();
                         }
                 } else {
@@ -65,7 +65,7 @@ function action(mode, type, selection) {
                                         return;
                                 }
 
-                                cm.sendSimple("#e#b<Party Quest: Romeo and Juliet>\r\n#k#n" + em.getProperty("party") + "\r\n\r\nMy beloved Juliet has been kidnapped! Although she is Alcadno's, I can't stand by and just see her suffer just because of this foolish clash. I need you and your colleagues help to save her! Please, help us!! Please have your #bparty leader#k talk to me.#b\r\n#L0#I want to participate in the party quest.\r\n#L1#I want to find party members.\r\n#L2#I would like to hear more details.");
+                                cm.sendSimple("#e#b<Party Quest: Romeo and Juliet>\r\n#k#n" + em.getProperty("party") + "\r\n\r\nMy beloved Juliet has been kidnapped! Although she is Alcadno's, I can't stand by and just see her suffer just because of this foolish clash. I need you and your colleagues help to save her! Please, help us!! Please have your #bparty leader#k talk to me.#b\r\n#L0#I want to participate in the party quest.\r\n#L1#I would like to " + (cm.getPlayer().isRecvPartySearchInviteEnabled() ? "disable" : "enable") + " Party Search.\r\n#L2#I would like to hear more details.");
                         } else if (status == 1) {
                                 if (selection == 0) {
                                         if (cm.getParty() == null) {
@@ -88,7 +88,8 @@ function action(mode, type, selection) {
                                                 cm.dispose();
                                         }
                                 } else if (selection == 1) {
-                                        cm.sendOk("Try using a Super Megaphone or asking your buddies or guild to join!");
+                                        var psState = cm.getPlayer().toggleRecvPartySearchInvite();
+                                        cm.sendOk("Your Party Search status is now: #b" + (psState ? "enabled" : "disabled") + "#k. Talk to me whenever you want to change it back.");
                                         cm.dispose();
                                 } else {
                                         cm.sendOk("#e#b<Party Quest: Romeo and Juliet>#k#n\r\nNot long ago, a scientist named Yulete has been banished from this town because of his researches of combined alchemies of Alcadno's and Zenumist's. Because of the immensurable amount of power coming from this combination, it is forbidden by law to study both. Yet, he ignored this law and got hands in both researches. As a result, he has been exiled.\r\nHe is now retaliating, already took my beloved one and his next target is me, as we are big pictures of Magatia, successors of both societies. But I'm not afraid. We must recover her at all costs!\r\n");

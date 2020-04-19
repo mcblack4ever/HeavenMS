@@ -1,6 +1,6 @@
 /*
     This file is part of the HeavenMS MapleStory Server, commands OdinMS-based
-    Copyleft (L) 2016 - 2018 RonanLana
+    Copyleft (L) 2016 - 2019 RonanLana
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -62,7 +62,7 @@ public class CommandsExecutor {
         return heading == USER_HEADING;
     }
 
-    private HashMap<String, RegisteredCommand> registeredCommands = new HashMap<>();
+    private HashMap<String, Command> registeredCommands = new HashMap<>();
     private Pair<List<String>, List<String>> levelCommandsCursor;
     private List<Pair<List<String>, List<String>>> commandsNameDesc = new ArrayList<>();
 
@@ -81,7 +81,7 @@ public class CommandsExecutor {
     }
     
     public void handle(MapleClient client, String message){
-            if (client.tryacquireClient()) {
+        if (client.tryacquireClient()) {
             try {
                 handleInternal(client, message);
             } finally {
@@ -93,6 +93,10 @@ public class CommandsExecutor {
     }
     
     private void handleInternal(MapleClient client, String message){
+        if (client.getPlayer().getMapId() == 300000012) {
+            client.getPlayer().yellowMessage("You do not have permission to use commands while in jail.");
+            return;
+        }
         final String splitRegex = "[ ]";
         String[] splitedMessage = message.substring(1).split(splitRegex, 2);
         if (splitedMessage.length < 2) {
@@ -103,31 +107,24 @@ public class CommandsExecutor {
         final String commandName = splitedMessage[0].toLowerCase();
         final String[] lowercaseParams = splitedMessage[1].toLowerCase().split(splitRegex);
         
-        final RegisteredCommand command = registeredCommands.get(commandName);
+        final Command command = registeredCommands.get(commandName);
         if (command == null){
             client.getPlayer().yellowMessage("Command '" + commandName + "' is not available. See @commands for a list of available commands.");
             return;
         }
         if (client.getPlayer().gmLevel() < command.getRank()){
-            client.getPlayer().yellowMessage("You not have permission to use this command.");
+            client.getPlayer().yellowMessage("You do not have permission to use this command.");
             return;
         }
         String[] params;
-        if (lowercaseParams.length > 0) {
-             params = Arrays.copyOfRange(lowercaseParams, 0, lowercaseParams.length);
+        if (lowercaseParams.length > 0 && !lowercaseParams[0].isEmpty()) {
+            params = Arrays.copyOfRange(lowercaseParams, 0, lowercaseParams.length);
         } else {
             params = new String[]{};
         }
-        try {
-            Command commandInstance = command.getCommandClass().newInstance();
-            commandInstance.execute(client, params);
-            writeLog(client, message);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
+        
+        command.execute(client, params);
+        writeLog(client, message);
     }
 
     private void writeLog(MapleClient client, String command){
@@ -168,11 +165,19 @@ public class CommandsExecutor {
             return;
         }
         
-        RegisteredCommand registeredCommand = new RegisteredCommand(commandClass, rank);
-        
         String commandName = syntax.toLowerCase();
         addCommandInfo(commandName, commandClass);
-        registeredCommands.put(commandName, registeredCommand);
+        
+        try {
+            Command commandInstance = commandClass.newInstance();     // thanks Halcyon for noticing commands getting reinstanced every call
+            commandInstance.setRank(rank);
+            
+            registeredCommands.put(commandName, commandInstance);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     private void registerLv0Commands(){
@@ -186,7 +191,7 @@ public class CommandsExecutor {
         addCommand("uptime", UptimeCommand.class);
         addCommand("gacha", GachaCommand.class);
         addCommand("dispose", DisposeCommand.class);
-        addCommand("changel", ChangeLinguaCommand.class);
+        addCommand("changel", ChangeLanguageCommand.class);
         addCommand("equiplv",  EquipLvCommand.class);
         addCommand("showrates", ShowRatesCommand.class);
         addCommand("rates", RatesCommand.class);
@@ -204,6 +209,8 @@ public class CommandsExecutor {
         addCommand("enableauth", EnableAuthCommand.class);
         addCommand("toggleexp", ToggleExpCommand.class);
         addCommand("mylawn", MapOwnerClaimCommand.class);
+        addCommand("bosshp", BossHpCommand.class);
+        addCommand("mobhp", MobHpCommand.class);
         
         commandsNameDesc.add(levelCommandsCursor);
     }
@@ -212,8 +219,6 @@ public class CommandsExecutor {
     private void registerLv1Commands() {
         levelCommandsCursor = new Pair<>((List<String>) new ArrayList<String>(), (List<String>) new ArrayList<String>());
         
-        addCommand("bosshp", 1, BossHpCommand.class);
-        addCommand("mobhp", 1, MobHpCommand.class);
         addCommand("whatdropsfrom", 1, WhatDropsFromCommand.class);
         addCommand("whodrops", 1, WhoDropsCommand.class);
         addCommand("buffme", 1, BuffMeCommand.class);
@@ -249,6 +254,7 @@ public class CommandsExecutor {
         addCommand("drop", 2, ItemDropCommand.class);
         addCommand("level", 2, LevelCommand.class);
         addCommand("levelpro", 2, LevelProCommand.class);
+        addCommand("setslot", 2, SetSlotCommand.class);
         addCommand("setstat", 2, SetStatCommand.class);
         addCommand("maxstat", 2, MaxStatCommand.class);
         addCommand("maxskill", 2, MaxSkillCommand.class);
@@ -258,6 +264,9 @@ public class CommandsExecutor {
         addCommand("unjail", 2, UnJailCommand.class);
         addCommand("job", 2, JobCommand.class);
         addCommand("unbug", 2, UnBugCommand.class);
+        addCommand("id", 2, IdCommand.class);
+        addCommand("gachalist", GachaListCommand.class);
+        addCommand("loot", LootCommand.class);
         
         commandsNameDesc.add(levelCommandsCursor);
     }
@@ -291,7 +300,6 @@ public class CommandsExecutor {
         addCommand("givevp", 3, GiveVpCommand.class);
         addCommand("givems", 3, GiveMesosCommand.class);
         addCommand("giverp", 3, GiveRpCommand.class);
-        addCommand("id", 3, IdCommand.class);
         addCommand("expeds", 3, ExpedsCommand.class);
         addCommand("kill", 3, KillCommand.class);
         addCommand("seed", 3, SeedCommand.class);
@@ -307,7 +315,6 @@ public class CommandsExecutor {
         addCommand("startmapevent", 3, StartMapEventCommand.class);
         addCommand("stopmapevent", 3, StopMapEventCommand.class);
         addCommand("online2", 3, OnlineTwoCommand.class);
-        addCommand("warpsnowball", 3, WarpSnowBallCommand.class);
         addCommand("ban", 3, BanCommand.class);
         addCommand("unban", 3, UnBanCommand.class);
         addCommand("healmap", 3, HealMapCommand.class);
@@ -339,6 +346,7 @@ public class CommandsExecutor {
         addCommand("exprate", 4, ExpRateCommand.class);
         addCommand("mesorate", 4, MesoRateCommand.class);
         addCommand("droprate", 4, DropRateCommand.class);
+        addCommand("bossdroprate", 4, BossDropRateCommand.class);
         addCommand("questrate", 4, QuestRateCommand.class);
         addCommand("travelrate", 4, TravelRateCommand.class);
         addCommand("fishrate", 4, FishingRateCommand.class);

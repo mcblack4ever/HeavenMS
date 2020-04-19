@@ -26,7 +26,8 @@ import client.MapleClient;
 import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
-import constants.ServerConstants;
+
+import config.YamlConfig;
 import server.life.MapleMonster;
 import server.life.MapleMonsterInformationProvider;
 //import server.life.MobAttackInfo;
@@ -36,11 +37,11 @@ import server.life.MobSkillFactory;
 import server.maps.MapleMap;
 import server.maps.MapleMapObject;
 import server.maps.MapleMapObjectType;
-import server.movement.LifeMovementFragment;
 import tools.MaplePacketCreator;
 import tools.Pair;
 import tools.Randomizer;
 import tools.data.input.SeekableLittleEndianAccessor;
+import tools.exceptions.EmptyMovementException;
 
 /**
  * @author Danny (Leifde)
@@ -53,6 +54,10 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 	public final void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
                 MapleCharacter player = c.getPlayer();
                 MapleMap map = player.getMap();
+                
+                if (player.isChangingMaps()) {  // thanks Lame for noticing mob movement shuffle (mob OID on different maps) happening on map transitions
+                    return;
+                }
                 
 		int objectid = slea.readInt();
 		short moveid = slea.readShort();
@@ -95,7 +100,7 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                         if (castPos != -1) {
                                 toUse = MobSkillFactory.getMobSkill(useSkillId, useSkillLevel);
                                 
-                                if (monster.canUseSkill(toUse)) {
+                                if (monster.canUseSkill(toUse, true)) {
                                         int animationTime = MapleMonsterInformationProvider.getInstance().getMobSkillAnimationTime(toUse);
                                         if(animationTime > 0 && toUse.getSkillId() != 129) {
                                                 toUse.applyDelayedEffect(player, monster, true, animationTime);
@@ -126,7 +131,9 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
                                 nextSkillLevel = skillToUse.getRight();
                                 nextUse = MobSkillFactory.getMobSkill(nextSkillId, nextSkillLevel);
                                 
-                                if (!(nextUse != null && nextUse.getHP() >= (int) (((float) monster.getHp() / monster.getMaxHp()) * 100) && mobMp >= nextUse.getMpCon())) {
+                                if (!(nextUse != null && monster.canUseSkill(nextUse, false) && nextUse.getHP() >= (int) (((float) monster.getHp() / monster.getMaxHp()) * 100) && mobMp >= nextUse.getMpCon())) {
+                                        // thanks OishiiKawaiiDesu for noticing mobs trying to cast skills they are not supposed to be able
+                                        
                                         nextSkillId = 0;
                                         nextSkillLevel = 0;
                                         nextUse = null;
@@ -139,26 +146,32 @@ public final class MoveLifeHandler extends AbstractMovementPacketHandler {
 		short start_x = slea.readShort(); // hmm.. startpos?
 		short start_y = slea.readShort(); // hmm...
 		Point startPos = new Point(start_x, start_y - 2);
-		List<LifeMovementFragment> res = parseMovement(slea);
-		
+		Point serverStartPos = new Point(monster.getPosition());
+                
                 Boolean aggro = monster.aggroMoveLifeUpdate(player);
                 if (aggro == null) return;
-                
+
                 if (nextUse != null) {
                         c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro, nextSkillId, nextSkillLevel));
 		} else {
 			c.announce(MaplePacketCreator.moveMonsterResponse(objectid, moveid, mobMp, aggro));
 		}
                 
-		if (res != null) {
-                        if (ServerConstants.USE_DEBUG_SHOW_RCVD_MVLIFE) {
+                
+                try {
+                        long movementDataStart = slea.getPosition();
+                        updatePosition(slea, monster, -2);  // Thanks Doodle & ZERO傑洛 for noticing sponge-based bosses moving out of stage in case of no-offset applied
+                        long movementDataLength = slea.getPosition() - movementDataStart; //how many bytes were read by updatePosition
+                        slea.seek(movementDataStart);
+                        
+                        if (YamlConfig.config.server.USE_DEBUG_SHOW_RCVD_MVLIFE) {
                                 System.out.println((isSkill ? "SKILL " : (isAttack ? "ATTCK " : " ")) + "castPos: " + castPos + " rawAct: " + rawActivity + " opt: " + pOption + " skillID: " + useSkillId + " skillLV: " + useSkillLevel + " " + "allowSkill: " + nextMovementCouldBeSkill + " mobMp: " + mobMp);
                         }
                         
-                        map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, nextMovementCouldBeSkill, rawActivity, useSkillId, useSkillLevel, pOption, startPos, res), monster.getPosition());
-			updatePosition(res, monster, -2);
-			map.moveMonster(monster, monster.getPosition());
-		}
+                        map.broadcastMessage(player, MaplePacketCreator.moveMonster(objectid, nextMovementCouldBeSkill, rawActivity, useSkillId, useSkillLevel, pOption, startPos, slea, movementDataLength), serverStartPos);
+                        //updatePosition(res, monster, -2); //does this need to be done after the packet is broadcast?
+                        map.moveMonster(monster, monster.getPosition());
+                } catch (EmptyMovementException e) {}
                 
                 if (banishPlayers != null) {
                         for (MapleCharacter chr : banishPlayers) {

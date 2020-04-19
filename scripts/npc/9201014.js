@@ -22,12 +22,12 @@
 /**
 	Pila Present
 -- By ---------------------------------------------------------------------------------------------
-	Angel (get31720 ragezone)
+	get31720 (RaGEZONE)
 -- Version Info -----------------------------------------------------------------------------------
 	1.0 - First Version by Angel
         2.0 - Second Version by happydud3 & XotiCraze
         3.0 - Third Version by RonanLana (HeavenMS)
-        4.0 - Four Version bby Drago (MapleStorySA)
+        4.0 - Fourth Version by Drago (MapleStorySA)
 ---------------------------------------------------------------------------------------------------
 **/
 var status = -1;
